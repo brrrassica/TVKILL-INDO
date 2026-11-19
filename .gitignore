@@ -1,8 +1,14 @@
 .gradle
 /local.properties
-/.idea/workspace.xml
-/.idea/libraries
-.DS_Store
-/build
 /.idea
 /*.iml
+.DS_Store
+
+/build
+/app/build
+/captures
+.kotlin/
+
+# Signing material must never be committed.
+*.jks
+*.keystore

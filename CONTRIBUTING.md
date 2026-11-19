@@ -1,34 +1,47 @@
-# Contributing
+# Contributing to TVKILL-INDO
 
-You want to contribute to **TV KILL**? That's great!
+Thanks for helping keep this open-source TV power-off app alive on modern Android and useful in Indonesia.
 
-To make the contribution process easier for new contributors, we have compiled this set of useful guidelines to give you a basic understanding on how things should be done.
-
-A lot of these recommendations will probably seem rather trivial to you if you are already an experienced FOSS contributor; however, to newcomers, they might not all be that self-evident.
+Please read [plans/milestones.md](plans/milestones.md) first to see what is in scope for `2.0-indo`. Wi-Fi control, full translations and smart-TV protocols are deferred to later milestones.
 
 ## Issues
-Regardless of whether you want to report a bug, request a feature or share other recommendations for the project, [issues](https://github.com/42SK/TVKILL/issues) are usually quite straight-forward.
 
-Here are a few minor things to consider when opening an issue:
+Use the fork's issue tracker at <https://github.com/brrrassica/TVKILL-INDO/issues>.
 
-* **Avoid Duplicates**: Please make sure that the nobody has already opened an issue on the same topic.
-* Try to give your Issue a **meaningful title** and a comprehensive description.
+- Search for duplicates first.
+- Use a descriptive title.
+- For IR failures, include: TV brand and model, approximate year, phone model and Android version, which app mode you used, and whether the physical remote works.
+- Do not report Play Store policy issues here; this fork is F-Droid/sideload only.
 
-## Pull Requests
-[Pull requests (PR)](https://github.com/42SK/TVKILL/pulls) tend to be a bit more complex than issues.
+## Pull requests
 
-[This article](https://opensource.com/article/18/6/anatomy-perfect-pull-request) provides an excellent guide on how to write a good PR.
+- One feature or fix per PR.
+- Open an issue first for large changes (Compose rewrite, catalog format, new transport).
+- Keep commits small with imperative messages.
+- Run `./gradlew clean assembleDebug testDebugUnitTest lintDebug` before opening a PR.
+- Prefer tests for changes to pattern parsing, timing conversion or settings.
 
-A few of the things to keep in mind:
+## Adding IR patterns
 
-* If you plan on doing something that will significantly change a large part of the code base, **consider opening an issue first**. This allows other users and developers to share their thoughts on your idea, which saves you the trouble of possibly having to change things later on.
+Pattern data is moving out of hardcoded Kotlin into a versioned, attributed catalog (milestone M4). Until that lands:
 
-* **One Feature per PR**: Don't overfill your PR with a bunch of unrelated miscellaneous contributions, split it up in multiple PRs, this will speed up the review process tremendously.
+1. Find the power-off pattern and carrier frequency using a learning IR receiver or a documented database.
+2. Include the **source URL** and its **license** in the code comment or catalog entry. Check [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) first.
+3. Prefer discrete `POWER OFF` codes over toggles.
+4. Put more reliable patterns earlier in a brand's list.
+5. State the TV model you verified against, or clearly mark the pattern as unverified/best-effort.
+6. If you cannot test on hardware, still open an issue with the source — someone with the TV may be able to confirm it.
 
-* Within your PR, please **[use meaningful commit messages](https://xkcd.com/1296/)**. The commit message should be a brief imperative text that clearly specifies what you have changed. You can also further elaborate your changes in the commit message body if necessary. ([This blogpost](https://chris.beams.io/posts/git-commit/) has some more information on how to write good commit messages.)
+Useful public sources: [LIRC remotes database](https://lirc-remotes.sourceforge.net/), [IRDB](https://github.com/probonopd/irdb), [Tasmota IR codes](https://tasmota.github.io/docs/Codes-for-IR-Remotes), and manufacturer IR documentation such as the [Hisense discrete command list](https://assets.hisense-usa.com/assets/ProductDownloads/16/c995389f20/Hisense-Discrete-IR-Commands-for-copy-paste_0.pdf). Check each source's redistribution terms before bundling.
 
-* Please give your PR an **informative title** and a **thorough description** of what you have done (and why). ("Changes" might be a sufficiently informative title for a David Bowie song, but it is probably not a very good title for your pull request.)
+## Translations
 
-Now that you have read these guidelines, you're pretty much all set for contributing to the **TV KILL** project!
+UI strings are still English-only in 2.0-indo, but the resource scaffold exists. See [docs/TRANSLATING.md](docs/TRANSLATING.md). Please do not machine-translate strings; open a PR with a native-speaker review.
 
-Thanks for your time, have fun and happy hacking!
+## Code style
+
+- Kotlin: official code style (`kotlin.code.style=official`).
+- Java: 4-space indentation, keep existing GPL headers.
+- No Google Play Services, analytics, ads or proprietary SDKs.
+
+By contributing you agree that your changes are licensed under GPLv3, the same license as the project.

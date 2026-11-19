@@ -17,7 +17,7 @@
 
 -->
 <resources>
-    <string name="app_name">TV KILL</string>
+    <string name="app_name">TVKILL-INDO</string>
     <string name="blaster_dialog_body">Um Fernseher auszuschalten braucht dein Smartphone einen Infrarot-Sender.</string>
     <string name="blaster_dialog_title">Kein IR-Sender</string>
     <string name="cancel">Abbrechen</string>

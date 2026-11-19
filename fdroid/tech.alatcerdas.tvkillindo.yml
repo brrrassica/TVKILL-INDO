@@ -1,0 +1,34 @@
+# F-Droid metadata skeleton for TVKILL-INDO 2.0-indo.
+# Copy into the fdroiddata repository as metadata/tech.alatcerdas.tvkillindo.yml
+# and fill in the signing key fingerprint before submitting.
+
+Categories:
+  - System
+License: GPL-3.0-only
+AuthorName: TVKILL-INDO contributors
+AuthorEmail: TODO
+SourceCode: https://github.com/brrrassica/TVKILL-INDO
+IssueTracker: https://github.com/brrrassica/TVKILL-INDO/issues
+Changelog: https://github.com/brrrassica/TVKILL-INDO/releases/tag/2.0-indo
+Summary: Turn off TVs with an Android phone's IR blaster
+Description: |
+  TVKILL-INDO transmits IR power-off patterns through a phone's built-in
+  infrared blaster. It is a GPLv3 fork of TV KILL, updated for current Android
+  versions and for TV brands commonly sold in Indonesia.
+
+  Requires an Android device with an IR blaster. Works offline: no accounts,
+  analytics, ads or network access.
+
+Repo Type: git
+Repo: https://github.com/brrrassica/TVKILL-INDO.git
+
+Builds:
+  - versionName: 2.0-indo
+    versionCode: 20000
+    commit: 2.0-indo
+    gradle:
+      - yes
+    output: app/build/outputs/apk/release/app-release-unsigned.apk
+
+# Set this when the release signing key is chosen (M7).
+# AllowedAPKSigningKeys: TODO_SHA256_FINGERPRINT
