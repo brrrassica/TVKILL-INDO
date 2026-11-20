@@ -145,4 +145,63 @@ class UniversalTransmissionControllerTest {
         assertEquals(UniversalOutcome.NoPatterns, outcome)
         assertTrue(transport.sent.isEmpty())
     }
+
+    @Test
+    fun muteRunSendsOnlyMutePatterns() {
+        val transport = FakeTransport()
+        val controller = UniversalTransmissionController(transport)
+
+        val outcome = controller.transmitMute(
+            listOf(brand("samsung", powerOff(), mute()), brand("sony", powerOff())),
+            delayMillis = 0,
+        )
+
+        assertEquals(UniversalOutcome.Completed(1), outcome)
+        assertEquals(1, transport.sent.size)
+        assertTrue(transport.sent.all { it.function == PatternFunction.MUTE })
+    }
+
+    @Test
+    fun muteRunWithoutMutePatternsYieldsNoPatterns() {
+        val transport = FakeTransport()
+        val controller = UniversalTransmissionController(transport)
+
+        val outcome = controller.transmitMute(
+            listOf(brand("samsung", powerOff())),
+            delayMillis = 0,
+        )
+
+        assertEquals(UniversalOutcome.NoPatterns, outcome)
+        assertTrue(transport.sent.isEmpty())
+    }
+
+    @Test
+    fun muteRunUnavailableTransportShortCircuits() {
+        val transport = FakeTransport(available = false)
+        val controller = UniversalTransmissionController(transport)
+
+        val outcome = controller.transmitMute(
+            listOf(brand("samsung", mute())),
+            delayMillis = 0,
+        )
+
+        assertEquals(UniversalOutcome.TransportUnavailable, outcome)
+        assertTrue(transport.sent.isEmpty())
+    }
+
+    @Test
+    fun muteRunCancellationReportsCancelled() {
+        val transport = FakeTransport()
+        val controller = UniversalTransmissionController(transport) {
+            transport.sent.isNotEmpty() // cancel right after the first send
+        }
+
+        val outcome = controller.transmitMute(
+            listOf(brand("samsung", mute()), brand("sony", mute())),
+            delayMillis = 0,
+        )
+
+        assertEquals(UniversalOutcome.Cancelled(1), outcome)
+        assertEquals(1, transport.sent.size)
+    }
 }

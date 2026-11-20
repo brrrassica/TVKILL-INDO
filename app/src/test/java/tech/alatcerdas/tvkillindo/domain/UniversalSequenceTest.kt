@@ -130,4 +130,24 @@ class UniversalSequenceTest {
 
         assertEquals(listOf("lg"), steps.map { it.brandId })
     }
+
+    @Test
+    fun muteSequenceSendsOneMutePerBrandInCatalogOrder() {
+        val brands = listOf(
+            brand("samsung", powerOff(), mute()),
+            brand("sony", powerOff()),
+            brand("lg", mute(), mute()),
+        )
+
+        val steps = UniversalSequence.muteSequence(brands)
+
+        assertEquals(listOf("samsung", "lg"), steps.map { it.brandId })
+        steps.forEach { assertEquals(PatternFunction.MUTE, it.pattern.function) }
+    }
+
+    @Test
+    fun muteSequenceEmptyCatalogOrNoMuteYieldsEmpty() {
+        assertTrue(UniversalSequence.muteSequence(emptyList()).isEmpty())
+        assertTrue(UniversalSequence.muteSequence(listOf(brand("sony", powerOff()))).isEmpty())
+    }
 }

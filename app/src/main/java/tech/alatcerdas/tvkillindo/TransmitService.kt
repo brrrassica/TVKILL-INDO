@@ -193,17 +193,6 @@ class TransmitService : Service() {
         UpdateWidget.updateAllWidgets(this)
 
         stopForeground(true)
-
-        //Dismiss the progress dialog (if present)
-        val dialog = MainActivity.progressDialog.getAndSet(null)
-        if (dialog != null) {
-            try {
-                dialog.dismiss()
-            } catch (e: IllegalArgumentException) {
-                //On Android 8.1, the OS apparently sometimes throws this exception due to some internal bug (this is not our fault)
-                e.printStackTrace()
-            }
-        }
     }
 
     override fun onBind(intent: Intent?): IBinder? {

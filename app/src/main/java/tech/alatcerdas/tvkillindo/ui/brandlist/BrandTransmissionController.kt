@@ -18,6 +18,8 @@ package tech.alatcerdas.tvkillindo.ui.brandlist
 
 import tech.alatcerdas.tvkillindo.domain.Brand
 import tech.alatcerdas.tvkillindo.domain.IrPattern
+import tech.alatcerdas.tvkillindo.domain.selectMutePattern
+import tech.alatcerdas.tvkillindo.domain.selectPattern
 import tech.alatcerdas.tvkillindo.domain.selectPowerOffPattern
 import tech.alatcerdas.tvkillindo.transport.TvTransport
 
@@ -41,17 +43,31 @@ sealed interface TransmissionOutcome {
 
 /**
  * Pure, testable glue between the Compose brands screen and a [TvTransport]:
- * picks the best POWER_OFF pattern via [selectPowerOffPattern] and hands it to
- * the transport. No Android classes — the screen stays previewable and the
- * logic stays unit-testable.
+ * picks the best pattern of the requested function (power-off normally, mute
+ * only when the experimental `show_mute` setting is on) and hands it to the
+ * transport. No Android classes — the screen stays previewable and the logic
+ * stays unit-testable.
  */
 class BrandTransmissionController(private val transport: TvTransport) {
 
-    fun transmit(brand: Brand): TransmissionOutcome {
-        val pattern = selectPowerOffPattern(brand) ?: return TransmissionOutcome.NoPattern
+    fun transmit(brand: Brand): TransmissionOutcome =
+        transmitPattern(brand, selectPowerOffPattern(brand))
+
+    /**
+     * Experimental mute tap: sends the brand's best MUTE pattern. Callers
+     * must gate this behind the `show_mute` setting.
+     */
+    fun transmitMute(brand: Brand): TransmissionOutcome =
+        transmitPattern(brand, selectMutePattern(brand))
+
+    private fun transmitPattern(
+        brand: Brand,
+        pattern: IrPattern?,
+    ): TransmissionOutcome {
+        val selected = pattern ?: return TransmissionOutcome.NoPattern
         if (!transport.isAvailable()) return TransmissionOutcome.TransportUnavailable
 
-        return transport.send(pattern).fold(
+        return transport.send(selected).fold(
             onSuccess = { TransmissionOutcome.Sent },
             onFailure = { TransmissionOutcome.Error(it.message ?: it.javaClass.simpleName) },
         )

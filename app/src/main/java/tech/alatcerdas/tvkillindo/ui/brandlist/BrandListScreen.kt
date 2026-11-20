@@ -62,6 +62,7 @@ fun BrandListScreen(
     brands: List<Brand>,
     modifier: Modifier = Modifier,
     hasIrEmitter: Boolean = true,
+    showMute: Boolean = false,
     controller: BrandTransmissionController? = null,
 ) {
     var query by rememberSaveable { mutableStateOf("") }
@@ -131,8 +132,12 @@ fun BrandListScreen(
                     items(visible, key = { it.id }) { brand ->
                         BrandRow(
                             brand = brand,
+                            showMute = showMute,
                             onBrandClick = { brand ->
                                 pendingOutcome = controller?.transmit(brand)
+                            },
+                            onMuteClick = { brand ->
+                                pendingOutcome = controller?.transmitMute(brand)
                             },
                         )
                         HorizontalDivider()
@@ -182,10 +187,13 @@ private fun Brand.Region.labelRes(): Int = when (this) {
 @Composable
 private fun BrandRow(
     brand: Brand,
+    showMute: Boolean,
     onBrandClick: (Brand) -> Unit,
+    onMuteClick: (Brand) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val powerOffCount = brand.patterns.count { it.function == IrPattern.PatternFunction.POWER_OFF }
+    val hasMute = brand.patterns.any { it.function == IrPattern.PatternFunction.MUTE }
     ListItem(
         headlineContent = { Text(brand.displayName) },
         supportingContent = {
@@ -194,10 +202,19 @@ private fun BrandRow(
             )
         },
         trailingContent = {
-            Text(
-                text = stringResource(brand.region.labelRes()),
-                style = MaterialTheme.typography.labelSmall,
-            )
+            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Text(
+                    text = stringResource(brand.region.labelRes()),
+                    style = MaterialTheme.typography.labelSmall,
+                )
+                if (showMute && hasMute) {
+                    androidx.compose.material3.TextButton(
+                        onClick = { onMuteClick(brand) },
+                    ) {
+                        Text(stringResource(R.string.mute))
+                    }
+                }
+            }
         },
         modifier = modifier.clickable(onClick = { onBrandClick(brand) }),
     )

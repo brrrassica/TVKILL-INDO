@@ -26,21 +26,32 @@ private val CONFIDENCE_RANK = mapOf(
 
 /**
  * Single-pattern transmission (brands screen): one tap sends exactly one,
- * best-qualified POWER_OFF pattern for the brand — not the full sequence the
- * legacy service transmits.
+ * best-qualified pattern for the brand — not the full sequence the legacy
+ * service transmits.
  *
  * Selection rules (unit-tested in [tech.alatcerdas.tvkillindo.domain.PatternSelectionTest]):
- *  - only POWER_OFF patterns are eligible (MUTE is a separate function);
+ *  - only patterns of the requested [IrPattern.PatternFunction] are eligible;
  *  - higher confidence wins: VERIFIED > COMMUNITY > IMPORTED;
  *  - among equal confidence, the catalog order decides (earliest first),
  *    because M4 orders patterns best-first within a brand.
  */
-fun selectPowerOffPattern(brand: Brand): IrPattern? =
+fun selectPattern(brand: Brand, function: IrPattern.PatternFunction): IrPattern? =
     brand.patterns
-        .filter { it.function == IrPattern.PatternFunction.POWER_OFF }
+        .filter { it.function == function }
         .minWithOrNull(
             compareBy(
                 { CONFIDENCE_RANK[it.confidence] ?: Int.MAX_VALUE },
                 { brand.patterns.indexOf(it) },
             ),
         )
+
+/** Single-pattern POWER_OFF transmission. */
+fun selectPowerOffPattern(brand: Brand): IrPattern? =
+    selectPattern(brand, IrPattern.PatternFunction.POWER_OFF)
+
+/**
+ * Single-pattern MUTE transmission (experimental, gated by the legacy
+ * `show_mute` setting in the UI).
+ */
+fun selectMutePattern(brand: Brand): IrPattern? =
+    selectPattern(brand, IrPattern.PatternFunction.MUTE)

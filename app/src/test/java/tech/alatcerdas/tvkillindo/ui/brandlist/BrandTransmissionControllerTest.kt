@@ -105,4 +105,37 @@ class BrandTransmissionControllerTest {
         assertEquals("boom", (outcome as TransmissionOutcome.Error).message)
         assertEquals(powerOffPattern(Confidence.VERIFIED), transport.sent)
     }
+
+    private fun mutePattern(confidence: Confidence) = IrPattern(
+        carrierHz = 38000,
+        periods = intArrayOf(1, 1, 10, 10),
+        function = IrPattern.PatternFunction.MUTE,
+        sourceUrl = "https://example.com",
+        license = "GPL-3.0-or-later",
+        confidence = confidence,
+    )
+
+    @Test
+    fun muteTapSendsBestMutePattern() {
+        val communityMute = mutePattern(Confidence.COMMUNITY)
+        val importedMute = mutePattern(Confidence.IMPORTED)
+        val transport = FakeTransport()
+        val controller = BrandTransmissionController(transport)
+
+        val outcome = controller.transmitMute(brand(importedMute, communityMute))
+
+        assertEquals(TransmissionOutcome.Sent, outcome)
+        assertEquals(communityMute, transport.sent)
+    }
+
+    @Test
+    fun muteTapOnBrandWithoutMuteYieldsNoPattern() {
+        val transport = FakeTransport()
+        val controller = BrandTransmissionController(transport)
+
+        val outcome = controller.transmitMute(brand(powerOffPattern(Confidence.VERIFIED)))
+
+        assertEquals(TransmissionOutcome.NoPattern, outcome)
+        assertEquals(null, transport.sent)
+    }
 }

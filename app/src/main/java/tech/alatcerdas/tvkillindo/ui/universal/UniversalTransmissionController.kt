@@ -102,4 +102,42 @@ class UniversalTransmissionController(
         return UniversalOutcome.Completed(sent)
     }
 
+    /**
+     * Experimental universal mute run: sends one MUTE pattern per brand,
+     * mirroring the legacy universal-tab mute button. Cancellation and
+     * progress semantics match [transmit].
+     */
+    fun transmitMute(
+        brands: List<Brand>,
+        delayMillis: Long,
+        onProgress: (sent: Int, total: Int) -> Unit = { _, _ -> },
+    ): UniversalOutcome {
+        val steps = UniversalSequence.muteSequence(brands)
+        if (steps.isEmpty()) return UniversalOutcome.NoPatterns
+        if (!transport.isAvailable()) return UniversalOutcome.TransportUnavailable
+
+        var sent = 0
+        cancelFlag.set(false)
+        onProgress(0, steps.size)
+        for (step in steps) {
+            if (cancelFlag.get() || isCancelled()) return UniversalOutcome.Cancelled(sent)
+            transport.send(step.pattern).fold(
+                onSuccess = {
+                    sent++
+                    onProgress(sent, steps.size)
+                },
+                onFailure = { return UniversalOutcome.Error(it.message ?: it.javaClass.simpleName, sent) },
+            )
+            if (delayMillis > 0) {
+                try {
+                    Thread.sleep(delayMillis)
+                } catch (_: InterruptedException) {
+                    Thread.currentThread().interrupt()
+                    return UniversalOutcome.Cancelled(sent)
+                }
+            }
+        }
+        return UniversalOutcome.Completed(sent)
+    }
+
 }

@@ -96,4 +96,23 @@ class PatternSelectionTest {
         val verified = pattern(confidence = Confidence.VERIFIED)
         assertEquals(verified, selectPowerOffPattern(brand(verified, imported)))
     }
+
+    @Test
+    fun selectMutePicksOnlyMutePatterns() {
+        val mute = pattern(function = PatternFunction.MUTE)
+        val off = pattern()
+        assertEquals(mute, selectMutePattern(brand(off, mute)))
+    }
+
+    @Test
+    fun selectMuteYieldsNullWithoutMutePatterns() {
+        assertNull(selectMutePattern(brand(pattern())))
+    }
+
+    @Test
+    fun selectMutePrefersHigherConfidence() {
+        val imported = pattern(function = PatternFunction.MUTE, confidence = Confidence.IMPORTED)
+        val verified = pattern(function = PatternFunction.MUTE, confidence = Confidence.VERIFIED)
+        assertEquals(verified, selectMutePattern(brand(imported, verified)))
+    }
 }

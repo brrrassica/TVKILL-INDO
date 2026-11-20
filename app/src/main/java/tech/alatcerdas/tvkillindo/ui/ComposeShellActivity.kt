@@ -76,9 +76,14 @@ class ShellViewModel : ViewModel() {
     var delayMillis: Long = 0L
         private set
 
+    /** Experimental mute visibility (legacy "show_mute" key). Loaded once. */
+    var showMute: Boolean = false
+        private set
+
     fun loadSettings(settings: Settings) {
         additionalPatterns = settings.additionalPatterns.value ?: false
         delayMillis = settings.preferences.getString("delay", "0")?.toLongOrNull() ?: 0L
+        showMute = settings.preferences.getBoolean("show_mute", false)
     }
 
     private var repetitiveControllerRef: RepetitiveTransmissionController? = null
@@ -96,10 +101,9 @@ class ShellViewModel : ViewModel() {
 
 /**
  * Compose shell for M3: a single activity with bottom navigation hosting the
- * universal, brands and repetitive screens. Deliberately **not** the launcher
- * and not exported: the legacy tab-based MainActivity stays user-facing until
- * the Compose rewrite reaches full feature parity (next M3 slice flips the
- * launcher and removes the legacy UI).
+ * universal, brands, repetitive and settings screens. This is the app's
+ * launcher entry point; the legacy tab-based UI was removed in the M3
+ * "flip launcher" slice.
  */
 class ComposeShellActivity : ComponentActivity() {
 
@@ -127,6 +131,7 @@ class ComposeShellActivity : ComponentActivity() {
                     hasIrEmitter = hasIrEmitter,
                     additionalPatterns = shellViewModel.additionalPatterns,
                     delayMillis = shellViewModel.delayMillis,
+                    showMute = shellViewModel.showMute,
                     transport = transport,
                     repetitiveController = shellViewModel.repetitiveController(transport),
                     settingsController = settingsController,
@@ -162,6 +167,7 @@ fun ComposeShell(
     hasIrEmitter: Boolean,
     additionalPatterns: Boolean,
     delayMillis: Long,
+    showMute: Boolean,
     transport: ConsumerIrTvTransport,
     repetitiveController: RepetitiveTransmissionController,
     settingsController: SettingsController,
@@ -209,6 +215,7 @@ fun ComposeShell(
                     additionalPatternsDefault = additionalPatterns,
                     delayMillis = delayMillis,
                     hasIrEmitter = hasIrEmitter,
+                    showMute = showMute,
                     controller = UniversalTransmissionController(transport),
                 )
             }
@@ -216,6 +223,7 @@ fun ComposeShell(
                 BrandListScreen(
                     brands = brands,
                     hasIrEmitter = hasIrEmitter,
+                    showMute = showMute,
                     controller = BrandTransmissionController(transport),
                 )
             }

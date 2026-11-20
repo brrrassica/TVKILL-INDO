@@ -64,4 +64,21 @@ object UniversalSequence {
         }
         return steps
     }
+
+    /**
+     * Builds the experimental universal mute sequence: one MUTE pattern per
+     * brand, in catalog order. Mirrors the legacy universal-tab mute button
+     * (gated by the `show_mute` setting in the UI). Unit-tested in
+     * [tech.alatcerdas.tvkillindo.domain.UniversalSequenceTest].
+     */
+    fun muteSequence(brands: List<Brand>): List<UniversalStep> {
+        val steps = mutableListOf<UniversalStep>()
+        brands.forEach { brand ->
+            val pattern = brand.patterns
+                .firstOrNull { it.function == PatternFunction.MUTE }
+                ?: return@forEach
+            steps += UniversalStep(brand.id, brand.displayName, pattern)
+        }
+        return steps
+    }
 }

@@ -80,6 +80,7 @@ fun UniversalScreen(
     delayMillis: Long,
     modifier: Modifier = Modifier,
     hasIrEmitter: Boolean = true,
+    showMute: Boolean = false,
     controller: UniversalTransmissionController? = null,
 ) {
     var running by remember { mutableStateOf(false) }
@@ -187,6 +188,34 @@ fun UniversalScreen(
                         )
                         Text(stringResource(R.string.off), style = MaterialTheme.typography.titleLarge)
                     }
+                }
+
+                if (showMute) Button(
+                    onClick = {
+                        running = true
+                        cancelling = false
+                        sentCount = 0
+                        totalCount = UniversalSequence.muteSequence(brands).size
+                        scope.launch {
+                            val outcome = withContext(Dispatchers.IO) {
+                                controller?.transmitMute(
+                                    brands = brands,
+                                    delayMillis = delayMillis,
+                                    onProgress = { sent, total ->
+                                        progressChannel.trySend(SendProgress(sent, total))
+                                    },
+                                ) ?: UniversalOutcome.Completed(0)
+                            }
+                            pendingOutcome = outcome
+                        }
+                    },
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    ),
+                    modifier = Modifier.size(width = 132.dp, height = 56.dp),
+                ) {
+                    Text(stringResource(R.string.mute))
                 }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
