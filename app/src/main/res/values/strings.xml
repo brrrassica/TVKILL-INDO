@@ -108,4 +108,8 @@
     <string name="universal_completed">Transmission completed! %1$d pattern(s) sent.</string>
     <string name="universal_cancelled">Transmission cancelled after %1$d pattern(s).</string>
 
+    <!-- Repetitive screen (Compose, M3) -->
+    <string name="repetitive_brand_label">Brand</string>
+    <string name="repetitive_rounds">%1$d round(s) sent</string>
+
 </resources>
