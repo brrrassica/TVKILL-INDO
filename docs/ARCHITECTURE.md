@@ -10,7 +10,7 @@ This document describes the target structure. During M0/M1 the legacy Java/XML U
 | `domain` | `Brand`, `IrPattern`, `TransmissionMode`, `TransmissionResult` | Scaffold |
 | `data` | Pattern catalog repository, settings repository, source/license metadata | Scaffold |
 | `transport` | `TvTransport` interface + `ConsumerIrTvTransport` implementation | Scaffold |
-| `ui` | Compose screens, ViewModels, navigation, theme | M3 |
+| `ui` | Compose screens, ViewModels, navigation, theme | M3 in progress: brands + universal screens landed, legacy tabs still the launcher |
 
 ## Key rules
 
@@ -19,6 +19,18 @@ This document describes the target structure. During M0/M1 the legacy Java/XML U
 3. **Pattern data is data, not code.** Patterns live in a versioned, attributed catalog parsed at runtime. This avoids the upstream 64 KB method limit when expanding Indonesian brands. Every entry has `sourceUrl`, `license`, `confidence` and, where possible, `model`.
 4. **No network dependency at build or run time** (2.0-indo). F-Droid builds must be reproducible and the app must work offline.
 5. **No proprietary dependencies**: no Google Play Services, no ads, no analytics.
+
+## Compose screens landed so far (M3)
+
+| Screen | Entry point | Logic layer | Tests |
+|---|---|---|---|
+| Brands | `ui/brandlist/BrandListActivity` | `BrandTransmissionController` + `selectPowerOffPattern` | `BrandTransmissionControllerTest`, `BrandListStateTest` |
+| Universal | `ui/universal/UniversalActivity` | `UniversalTransmissionController` + `UniversalSequence` | `UniversalTransmissionControllerTest`, `UniversalSequenceTest` |
+
+Neither activity is the launcher yet: `MainActivity` keeps the legacy tab UI
+until feature parity is verified. Universal mode sends only `POWER_OFF`
+patterns, one per brand per round, with the "additional patterns" switch
+adding deeper rounds — byte-identical pattern data to the legacy service.
 
 ## Current transmission flow (legacy, for reference)
 

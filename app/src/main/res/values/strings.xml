@@ -103,4 +103,9 @@
     <string name="region_filter_local">Local (ID)</string>
     <string name="region_filter_legacy">Legacy</string>
 
+    <!-- Universal screen (Compose, M3) -->
+    <string name="universal_progress">Pattern %1$d of %2$d</string>
+    <string name="universal_completed">Transmission completed! %1$d pattern(s) sent.</string>
+    <string name="universal_cancelled">Transmission cancelled after %1$d pattern(s).</string>
+
 </resources>

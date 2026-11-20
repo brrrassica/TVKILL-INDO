@@ -62,6 +62,12 @@
             android:label="@string/app_name"
             android:exported="false" />
 
+        <!-- Compose universal-mode screen (M3 slice). -->
+        <activity
+            android:name="tech.alatcerdas.tvkillindo.ui.universal.UniversalActivity"
+            android:label="@string/menu_universal_mode"
+            android:exported="false" />
+
         <service
             android:name=".TransmitService"
             android:exported="false"
