@@ -266,9 +266,18 @@ These are explicitly **out of scope** for 2.0-indo; the design work in M3/M4 kee
 
 Added while building the scaffolds; these do not change the locked decisions above.
 
+### 10.0 Hard rule: never build unsigned APKs
+
+**Do not produce unsigned APK artifacts. Ever.** `app/build.gradle` only configures release signing when `SIGNING_STORE_FILE`, `SIGNING_STORE_PASSWORD`, `SIGNING_KEY_ALIAS` and `SIGNING_KEY_PASSWORD` are all set; without them `assembleRelease` silently emits `app-release-unsigned.apk`, which is a useless artifact and must not be created.
+
+- Routine verification is `./gradlew testDebugUnitTest assembleDebug lintDebug --max-workers=1`. Release tasks are **not** part of routine verification.
+- `assembleRelease` (or any task producing release artifacts) may only run when all four signing environment variables are present, so the output is a signed APK.
+- If an unsigned release APK is produced by mistake, delete `app/build/outputs/apk/release/` immediately and report it; never distribute or commit it.
+- `assembleDebug` is allowed: the debug keystore signs it automatically.
+
 - **Verified toolchain:** Gradle 9.6.0 wrapper, AGP 9.5.1 (built-in Kotlin 2.2.10), Compose compiler plugin 2.2.10, compileSdk/targetSdk 36, build-tools 36.0.0, minSdk 24. Local verification used JDK 25; CI is pinned to JDK 21 LTS.
 - **Dependency ceiling:** the newest AndroidX/Compose artifacts (core-ktx 1.19.1, lifecycle 2.11.0, navigation-compose 2.10.x, Compose BOM 2026.09.00) declare `minCompileSdk 37`. Platform 37 is not yet published as a stable SDK package, so the catalog pins the newest versions compatible with compileSdk 36: core-ktx 1.18.0, lifecycle 2.10.0, navigation-compose 2.9.1, Compose BOM 2026.01.00, activity-compose 1.13.0, appcompat 1.8.0, Material 1.14.0. Revisit when platform 37 ships (2.x).
 - **AGP 9 built-in Kotlin:** the `kotlin-android` plugin is gone; Kotlin is compiled by AGP. The Compose compiler plugin is kept at the same version as AGP's bundled Kotlin to avoid classpath conflicts.
-- **Verified on the scaffold:** `clean assembleDebug testDebugUnitTest assembleRelease lintDebug` all pass on both JDK 21 (the CI pin) and JDK 25, and two clean unsigned release builds on the **same JDK** produce byte-identical APKs. The generated manifest reports package `tech.alatcerdas.tvkillindo`, minSdk 24, targetSdk 36.
+- **Verified on the scaffold:** `clean assembleDebug testDebugUnitTest lintDebug` all pass on both JDK 21 (the CI pin) and JDK 25. The generated manifest reports package `tech.alatcerdas.tvkillindo`, minSdk 24, targetSdk 36. (Release reproducibility was confirmed historically with two clean builds on the **same JDK**; see §10.0 — such builds require proper signing config and are not part of routine verification.)
 - **JDK is part of the reproducibility contract:** builds on JDK 21 and JDK 25 are each internally reproducible but differ from each other (`classes3.dex` and `assets/dexopt/baseline.prof` differ). CI and F-Droid must therefore keep one pinned JDK for all comparison builds; do not compare APKs produced by different JDKs.
 - **Expected remaining warnings:** the legacy UI still uses `PreferenceManager`, `android.app.Fragment`, `ProgressDialog` and `getSerializableExtra`; these are intentional until M2/M3 replaces them. The two app-widget layouts suppress `UseAppTint` because `RemoteViews` cannot inflate AppCompat widgets.
