@@ -15,6 +15,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import tech.alatcerdas.tvkillindo.data.CatalogRepository
+import tech.alatcerdas.tvkillindo.transport.ConsumerIrTvTransport
 import tech.alatcerdas.tvkillindo.ui.theme.TvkillIndoTheme
 
 /**
@@ -31,11 +32,15 @@ class BrandListActivity : ComponentActivity() {
         val irManager = getSystemService(Context.CONSUMER_IR_SERVICE) as? ConsumerIrManager
         val hasIrEmitter = irManager != null && irManager.hasIrEmitter()
 
+        val transport = ConsumerIrTvTransport(this)
+        val controller = BrandTransmissionController(transport)
+
         setContent {
             TvkillIndoTheme {
                 BrandListScreen(
                     brands = CatalogRepository().brands(),
                     hasIrEmitter = hasIrEmitter,
+                    controller = controller,
                 )
             }
         }

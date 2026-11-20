@@ -91,6 +91,12 @@
     <string name="brand_list_empty">No brands match your search.</string>
     <string name="brand_list_pattern_count">%1$d power-off signal(s)</string>
 
+    <!-- Brand list transmission feedback (Compose, M3) -->
+    <string name="brand_list_sent">Power-off signal sent. Point the IR blaster at the TV.</string>
+    <string name="brand_list_no_pattern">No power-off signal available for this brand yet.</string>
+    <string name="brand_list_transport_unavailable">This device has no IR blaster.</string>
+    <string name="brand_list_send_failed">Sending the signal failed.</string>
+
     <string name="region_filter_all">All</string>
     <string name="region_filter_premium">Premium</string>
     <string name="region_filter_mainstream">Mainstream</string>
