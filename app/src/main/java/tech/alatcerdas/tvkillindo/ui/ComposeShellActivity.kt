@@ -49,6 +49,9 @@ import tech.alatcerdas.tvkillindo.ui.brandlist.BrandListScreen
 import tech.alatcerdas.tvkillindo.ui.brandlist.BrandTransmissionController
 import tech.alatcerdas.tvkillindo.ui.repetitive.RepetitiveScreen
 import tech.alatcerdas.tvkillindo.ui.repetitive.RepetitiveTransmissionController
+import tech.alatcerdas.tvkillindo.ui.settings.SettingsController
+import tech.alatcerdas.tvkillindo.ui.settings.SettingsScreen
+import tech.alatcerdas.tvkillindo.ui.settings.SharedPreferencesSettingsStore
 import tech.alatcerdas.tvkillindo.ui.theme.TvkillIndoTheme
 import tech.alatcerdas.tvkillindo.ui.universal.UniversalScreen
 import tech.alatcerdas.tvkillindo.ui.universal.UniversalTransmissionController
@@ -112,6 +115,11 @@ class ComposeShellActivity : ComponentActivity() {
 
         shellViewModel.loadSettings(settings)
 
+        // The settings tab persists through the legacy preference keys; the
+        // shell re-reads them via onSettingsChanged so transmission screens
+        // always use the latest values (upstream issue #52).
+        val settingsController = SettingsController(SharedPreferencesSettingsStore(this))
+
         setContent {
             TvkillIndoTheme {
                 ComposeShell(
@@ -121,6 +129,10 @@ class ComposeShellActivity : ComponentActivity() {
                     delayMillis = shellViewModel.delayMillis,
                     transport = transport,
                     repetitiveController = shellViewModel.repetitiveController(transport),
+                    settingsController = settingsController,
+                    onSettingsChanged = {
+                        shellViewModel.loadSettings(Settings.with(this))
+                    },
                 )
             }
         }
@@ -137,6 +149,7 @@ private enum class ShellTab(val route: String, val labelRes: Int, val iconRes: I
     UNIVERSAL("universal", R.string.menu_universal_mode, R.drawable.ic_power_settings_new_black_48dp),
     BRANDS("brands", R.string.menu_specific_devices, R.drawable.ic_settings_black_48dp),
     REPETITIVE("repetitive", R.string.menu_repetitive_mode, R.drawable.ic_play_arrow_black_48dp),
+    SETTINGS("settings", R.string.menu_settings, R.drawable.ic_clear_black_48dp),
 }
 
 /**
@@ -151,6 +164,8 @@ fun ComposeShell(
     delayMillis: Long,
     transport: ConsumerIrTvTransport,
     repetitiveController: RepetitiveTransmissionController,
+    settingsController: SettingsController,
+    onSettingsChanged: () -> Unit,
 ) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -211,6 +226,12 @@ fun ComposeShell(
                     delayMillis = delayMillis,
                     hasIrEmitter = hasIrEmitter,
                     controller = repetitiveController,
+                )
+            }
+            composable(ShellTab.SETTINGS.route) {
+                SettingsScreen(
+                    controller = settingsController,
+                    onChanged = onSettingsChanged,
                 )
             }
         }

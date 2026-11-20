@@ -23,6 +23,7 @@
     <string name="menu_universal_mode">Universal Remote</string>
     <string name="menu_repetitive_mode">Repetitive-Mode</string>
     <string name="menu_specific_devices">Brands</string>
+    <string name="menu_settings">Settings</string>
 
     <!-- Transmission progress-dialog -->
     <string name="pd_transmission_in_progress">Transmitting patterns…</string>
