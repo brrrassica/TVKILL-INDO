@@ -16,12 +16,13 @@
  */
 package tech.alatcerdas.tvkillindo;
 
-import android.app.ListFragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+
+import androidx.fragment.app.ListFragment;
 
 
 public class IndividualremoteFragment extends ListFragment {
@@ -31,7 +32,7 @@ public class IndividualremoteFragment extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         stopped = false;
         View view = inflater.inflate(R.layout.individualremote, container, false);
-        ArrayAdapter adapter = new CustomAdapter(getActivity(), BrandContainer.getAllBrands());
+        ArrayAdapter adapter = new CustomAdapter(requireContext(), BrandContainer.getAllBrands());
         setListAdapter(adapter);
         return view;
     }
@@ -41,7 +42,7 @@ public class IndividualremoteFragment extends ListFragment {
         super.onResume();
         //Make sure that the list style updates after changing the settings
         if (stopped)
-            getFragmentManager().beginTransaction().detach(this).attach(this).commit();
+            getParentFragmentManager().beginTransaction().detach(this).attach(this).commit();
     }
 
     @Override

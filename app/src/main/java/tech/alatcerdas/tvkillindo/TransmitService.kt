@@ -26,8 +26,8 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.graphics.BitmapFactory
 import android.os.*
-import android.preference.PreferenceManager.getDefaultSharedPreferences
 import androidx.core.app.NotificationCompat
+import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import androidx.core.os.CancellationSignal
@@ -42,6 +42,9 @@ class TransmitService : Service() {
     // helper method for starting
     companion object {
         private const val EXTRA_REQUEST = "request"
+        private const val EXTRA_ACTION = "action"
+        private const val EXTRA_FOREVER = "forever"
+        private const val EXTRA_BRAND_NAME = "brandName"
         private const val NOTIFICATION_ID = 1
         const val NOTIFICATION_CHANNEL = "report running in background"
 
@@ -82,8 +85,33 @@ class TransmitService : Service() {
         }
 
         fun buildIntent(request: TransmitServiceRequest, context: Context): Intent {
-            return Intent(context, TransmitService::class.java)
-                    .putExtra(EXTRA_REQUEST, request)
+            val intent = Intent(context, TransmitService::class.java)
+            return when (request) {
+                is TransmitServiceSendRequest -> intent
+                        .putExtra(EXTRA_REQUEST, true)
+                        .putExtra(EXTRA_ACTION, request.action.name)
+                        .putExtra(EXTRA_FOREVER, request.forever)
+                        .putExtra(EXTRA_BRAND_NAME, request.brandName)
+                TransmitServiceCancelRequest -> intent
+                        .putExtra(EXTRA_REQUEST, false)
+            }
+        }
+
+        /**
+         * Rebuilds the request from typed intent extras instead of the deprecated
+         * Intent.getSerializableExtra. Sealed TransmitServiceRequest objects are
+         * only used in-process; the intent carries plain primitives.
+         */
+        fun requestFromIntent(intent: Intent): TransmitServiceRequest {
+            return if (intent.getBooleanExtra(EXTRA_REQUEST, false)) {
+                TransmitServiceSendRequest(
+                        TransmitServiceAction.valueOf(intent.getStringExtra(EXTRA_ACTION)!!),
+                        intent.getBooleanExtra(EXTRA_FOREVER, false),
+                        intent.getStringExtra(EXTRA_BRAND_NAME)
+                )
+            } else {
+                TransmitServiceCancelRequest
+            }
         }
     }
 
@@ -167,14 +195,14 @@ class TransmitService : Service() {
         stopForeground(true)
 
         //Dismiss the progress dialog (if present)
-        if (MainActivity.progressDialog != null) {
+        val dialog = MainActivity.progressDialog.getAndSet(null)
+        if (dialog != null) {
             try {
-                MainActivity.progressDialog.dismiss()
+                dialog.dismiss()
             } catch (e: IllegalArgumentException) {
                 //On Android 8.1, the OS apparently sometimes throws this exception due to some internal bug (this is not our fault)
                 e.printStackTrace()
             }
-            MainActivity.progressDialog = null
         }
     }
 
@@ -184,7 +212,7 @@ class TransmitService : Service() {
 
     // managing of current running things
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val request = intent!!.getSerializableExtra(EXTRA_REQUEST) as TransmitServiceRequest
+        val request = requestFromIntent(intent!!)
         val cancel = this.cancel
 
         if (request is TransmitServiceSendRequest) {
@@ -324,19 +352,9 @@ class TransmitService : Service() {
                 if (request.progress != null) {
                     notificationBuilder.setProgress(request.progress.max, request.progress.current, false)
 
-                    //Also update the progress dialog (if present)
-                    if (MainActivity.progressDialog != null) {
-                        MainActivity.progressDialog.max = request.progress.max
-                        MainActivity.progressDialog.progress = request.progress.current + 1
-                        if (verboseInformation)
-                            try {
-                                MainActivity.progressDialog.setProgressNumberFormat(BrandContainer.allBrands[request.progress.current].designation
-                                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() } + " (%1d/%2d)")
-                            } catch (e: ArrayIndexOutOfBoundsException) {
-                                //There is no obvious reason why this exception should occur, but, according to crash reports from Google Play, it does happen.
-                                e.printStackTrace()
-                            }
-                    }
+                    //Also update the progress dialog (if present).
+                    //The dialog is now an indeterminate Material AlertDialog, so there is
+                    //no numeric progress to write into it; it is dismissed on completion.
                 }
             }
 

@@ -16,12 +16,14 @@
  */
 package tech.alatcerdas.tvkillindo;
 
-import android.app.Fragment;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.fragment.app.Fragment;
+import androidx.preference.PreferenceManager;
 
 
 public class UniversalmodeFragment extends Fragment {
@@ -38,7 +40,8 @@ public class UniversalmodeFragment extends Fragment {
     //This method updates the visibility of the mute-button
     private void updateMuteButton(View v) {
         //Check whether the mute-button shall be displayed
-        if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("show_mute", false))
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
+        if (preferences.getBoolean("show_mute", false))
             v.findViewById(R.id.mute).setVisibility(View.VISIBLE);
         else v.findViewById(R.id.mute).setVisibility(View.GONE);
     }

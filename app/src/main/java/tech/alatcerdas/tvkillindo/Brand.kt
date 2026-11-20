@@ -17,7 +17,7 @@
 package tech.alatcerdas.tvkillindo
 
 import android.content.Context
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 
 class Brand(val designation: String, val patterns: Array<Pattern>, val mute: Pattern) {
     // this method transmits all of the brands off-patterns

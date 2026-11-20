@@ -16,9 +16,7 @@
  */
 package tech.alatcerdas.tvkillindo;
 
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +24,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.preference.PreferenceManager;
 
 
 public class CustomAdapter extends ArrayAdapter<Brand> {
@@ -61,7 +61,7 @@ public class CustomAdapter extends ArrayAdapter<Brand> {
             } else {
                 //Show a progress dialog and transmit the brands patterns
                 final Context c = getContext();
-                final ProgressDialog transmittingInfo = MainActivity.getProgressDialog(c, true);
+                final androidx.appcompat.app.AlertDialog transmittingInfo = MainActivity.getProgressDialog(c, true);
                 Thread transmit = new Thread() {
                     public void run() {
                         BrandItem.kill(c);
@@ -94,7 +94,7 @@ public class CustomAdapter extends ArrayAdapter<Brand> {
                 } else {
                     //Show a progress dialog and transmit the brands mute-pattern
                     final Context c = getContext();
-                    final ProgressDialog transmittingInfo = MainActivity.getProgressDialog(c, true);
+                    final androidx.appcompat.app.AlertDialog transmittingInfo = MainActivity.getProgressDialog(c, true);
                     Thread transmit = new Thread() {
                         public void run() {
                             BrandItem.mute(c);

@@ -16,7 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <PreferenceCategory android:title="@string/category_appearance">
         <CheckBoxPreference
             android:defaultValue="false"
@@ -47,9 +48,14 @@
         <EditTextPreference
             android:defaultValue="0"
             android:key="delay"
-            android:numeric="integer"
             android:summary="@string/delay_summary"
-            android:title="@string/delay" />
+            android:title="@string/delay"
+            app:useSimpleSummaryProvider="true">
+            <!-- numeric-only input; replaces the deprecated android:numeric attribute -->
+            <extra
+                android:name="inputType"
+                android:value="number" />
+        </EditTextPreference>
 
     </PreferenceCategory>
 

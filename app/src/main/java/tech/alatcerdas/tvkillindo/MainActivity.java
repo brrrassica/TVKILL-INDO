@@ -16,12 +16,6 @@
  */
 package tech.alatcerdas.tvkillindo;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -34,16 +28,32 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Spinner;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.preference.PreferenceManager;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 
-import static android.preference.PreferenceManager.getDefaultSharedPreferences;
+import java.util.concurrent.atomic.AtomicReference;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
 
     public static int repetitiveModeBrand;
-    public static ProgressDialog progressDialog;
+
+    /**
+     * Progress dialog shown while a universal/single-brand transmission runs.
+     * Replaces the deprecated android.app.ProgressDialog: a Material AlertDialog
+     * hosting an indeterminate progress view. The reference is cleared as soon
+     * as the dialog is dismissed; TransmitService dismisses it on completion.
+     */
+    public static AtomicReference<AlertDialog> progressDialog = new AtomicReference<>(null);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +99,7 @@ public class MainActivity extends Activity {
         } else {
             //Display a Dialog that tells the user to buy a different phone
             AlertDialog alertDialog;
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
             builder.setCancelable(false);
             builder.setTitle(R.string.blaster_dialog_title);
             builder.setMessage(R.string.blaster_dialog_body);
@@ -116,8 +126,9 @@ public class MainActivity extends Activity {
 
             try {
                 //Show a progress dialog and transmit all patterns
-                progressDialog = getProgressDialog(c, false);
-                progressDialog.show();
+                AlertDialog dialog = getProgressDialog(c, false);
+                progressDialog.set(dialog);
+                dialog.show();
                 transmit = new Thread() {
                     public void run() {
                         switch (button) {
@@ -187,20 +198,27 @@ public class MainActivity extends Activity {
         kill(this, 'm');
     }
 
-    //This method returns a ProgressDialog
-    public static ProgressDialog getProgressDialog(final Context c, boolean singlePattern) {
-        if (singlePattern)
-            return ProgressDialog.show(c, c.getString(R.string.pd_transmission_in_progress), c.getString(R.string.pd_please_wait), true, false);
+    //This method returns a progress dialog (Material AlertDialog with an indeterminate
+    // progress indicator, replacing the deprecated android.app.ProgressDialog)
+    public static AlertDialog getProgressDialog(final Context c, boolean singlePattern) {
+        android.view.View content = android.view.LayoutInflater.from(c)
+                .inflate(R.layout.progress_dialog, null);
 
-        ProgressDialog pd = new ProgressDialog(c);
-        pd.setProgressStyle(getDefaultSharedPreferences(c).getBoolean("old_dialog", false)
-                ? ProgressDialog.STYLE_SPINNER : ProgressDialog.STYLE_HORIZONTAL);
-        pd.setMax(BrandContainer.getAllBrands().length);
-        pd.setTitle(c.getString(R.string.pd_transmission_in_progress));
-        pd.setMessage(c.getString(R.string.pd_please_wait));
-        pd.setCancelable(true);
-        pd.setOnCancelListener(dialogInterface -> TransmitService.Companion.executeRequest(TransmitServiceCancelRequest.INSTANCE, c));
-        return pd;
+        AlertDialog.Builder builder = new MaterialAlertDialogBuilder(c)
+                .setTitle(c.getString(R.string.pd_transmission_in_progress))
+                .setMessage(c.getString(R.string.pd_please_wait))
+                .setView(content);
+
+        AlertDialog dialog = builder.create();
+
+        if (!singlePattern) {
+            // Cancelling stops the ongoing universal transmission
+            dialog.setOnCancelListener(dialogInterface ->
+                    TransmitService.Companion.executeRequest(TransmitServiceCancelRequest.INSTANCE, c));
+        }
+
+        dialog.setCanceledOnTouchOutside(false);
+        return dialog;
     }
 
     public static boolean isRepetitiveModeRunning() {
@@ -265,7 +283,7 @@ public class MainActivity extends Activity {
     //This Method displays a dialog that warns the user about the running repetitive-mode
     public static void repetitiveModeActiveDialog(final Context c) {
         AlertDialog alertDialog;
-        AlertDialog.Builder builder = new AlertDialog.Builder(c);
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(c);
         builder.setCancelable(true);
         builder.setTitle(R.string.mode_running);
         builder.setMessage(R.string.dialog_running_body);
@@ -278,9 +296,9 @@ public class MainActivity extends Activity {
     //This method displays a specific help-dialog for the fragment that is currently displayed
     public void showHelp(View v) {
         AlertDialog alertDialog;
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new MaterialAlertDialogBuilder(this);
         builder.setCancelable(true);
-        switch (getFragmentManager().findFragmentById(R.id.fragment_container).getTag()) {
+        switch (getSupportFragmentManager().findFragmentById(R.id.fragment_container).getTag()) {
             case "0":
                 builder.setTitle(R.string.menu_specific_devices);
                 builder.setMessage(R.string.help_individual_mode);
@@ -307,7 +325,7 @@ public class MainActivity extends Activity {
 
     //This method displays a fragment
     void displayFragment(Fragment fragment, String tag) {
-        FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fragment_container, fragment, tag);
         fragmentTransaction.commit();

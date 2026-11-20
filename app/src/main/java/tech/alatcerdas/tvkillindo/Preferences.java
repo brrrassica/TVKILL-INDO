@@ -17,14 +17,30 @@
 package tech.alatcerdas.tvkillindo;
 
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceFragmentCompat;
 
-public class Preferences extends PreferenceActivity {
+/**
+ * Settings screen. The deprecated android.preference.PreferenceActivity is
+ * replaced by AppCompatActivity + PreferenceFragmentCompat (AndroidX),
+ * reading the same preferences.xml so existing preference keys are unchanged.
+ */
+public class Preferences extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.xml.preferences);
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(android.R.id.content, new SettingsFragment())
+                .commit();
+    }
+
+    public static class SettingsFragment extends PreferenceFragmentCompat {
+        @Override
+        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+            addPreferencesFromResource(R.xml.preferences);
+        }
     }
 }

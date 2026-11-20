@@ -16,15 +16,16 @@
  */
 package tech.alatcerdas.tvkillindo;
 
-import android.app.Fragment;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 import java.util.ArrayList;
 
@@ -50,7 +51,7 @@ public class RepetitiveModeFragment extends Fragment implements AdapterView.OnIt
         }
 
         //Create an ArrayAdapter using the optionList and the default layout
-        ArrayAdapter arrayAdapter = new ArrayAdapter(getActivity(), android.R.layout.simple_spinner_item, optionList);
+        ArrayAdapter arrayAdapter = new ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, optionList);
         //Use the default layout for the spinner's menu
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         //Attach the Adapter to the spinner
@@ -77,7 +78,7 @@ public class RepetitiveModeFragment extends Fragment implements AdapterView.OnIt
         super.onResume();
 
         //Set the design of the repetitive-button
-        ((MainActivity) getActivity()).updateRepetitiveButton();
+        ((MainActivity) requireActivity()).updateRepetitiveButton();
 
     }
 }
