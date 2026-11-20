@@ -12,3 +12,7 @@
 # Signing material must never be committed.
 *.jks
 *.keystore
+
+# Downloaded third-party IR reference material (see .cache/ir-sources/README.md).
+# Large, redistributable-with-restrictions data is kept local, never in git.
+/.cache/
