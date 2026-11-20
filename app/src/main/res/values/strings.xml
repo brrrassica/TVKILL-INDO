@@ -86,4 +86,15 @@
     <string name="old_dialog">Simplified progress dialog</string>
     <string name="old_dialog_summary">Use the old circular progress dialog</string>
 
+    <!-- Brand list (Compose, M3) -->
+    <string name="brand_list_search_hint">Search brands</string>
+    <string name="brand_list_empty">No brands match your search.</string>
+    <string name="brand_list_pattern_count">%1$d power-off signal(s)</string>
+
+    <string name="region_filter_all">All</string>
+    <string name="region_filter_premium">Premium</string>
+    <string name="region_filter_mainstream">Mainstream</string>
+    <string name="region_filter_local">Local (ID)</string>
+    <string name="region_filter_legacy">Legacy</string>
+
 </resources>
