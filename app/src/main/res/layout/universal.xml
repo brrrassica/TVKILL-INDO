@@ -37,7 +37,9 @@
             android:onClick="off"
             android:src="@drawable/ic_power_settings_new_black_48dp"
             app:backgroundTint="#ff0000"
-            app:borderWidth="0dp" />
+            app:borderWidth="0dp"
+            app:fabCustomSize="100dp"
+            app:maxImageSize="48dp" />
 
     </LinearLayout>
 

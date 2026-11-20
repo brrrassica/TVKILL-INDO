@@ -1,4 +1,4 @@
-# F-Droid metadata skeleton for TVKILL-INDO 2.0-indo.
+# F-Droid metadata skeleton for TVKILL-INDO 2.0.1-indo.
 # Copy into the fdroiddata repository as metadata/tech.alatcerdas.tvkillindo.yml
 # and fill in the signing key fingerprint before submitting.
 
@@ -9,7 +9,7 @@ AuthorName: TVKILL-INDO contributors
 AuthorEmail: TODO
 SourceCode: https://github.com/brrrassica/TVKILL-INDO
 IssueTracker: https://github.com/brrrassica/TVKILL-INDO/issues
-Changelog: https://github.com/brrrassica/TVKILL-INDO/releases/tag/2.0-indo
+Changelog: https://github.com/brrrassica/TVKILL-INDO/releases/tag/2.0.1-indo
 Summary: Turn off TVs with an Android phone's IR blaster
 Description: |
   TVKILL-INDO transmits IR power-off patterns through a phone's built-in
@@ -23,9 +23,9 @@ Repo Type: git
 Repo: https://github.com/brrrassica/TVKILL-INDO.git
 
 Builds:
-  - versionName: 2.0-indo
-    versionCode: 20000
-    commit: 2.0-indo
+  - versionName: 2.0.1-indo
+    versionCode: 20001
+    commit: 2.0.1-indo
     gradle:
       - yes
     output: app/build/outputs/apk/release/app-release-unsigned.apk

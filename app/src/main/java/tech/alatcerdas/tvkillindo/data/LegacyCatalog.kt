@@ -31,6 +31,13 @@ object LegacyCatalog {
     private const val SOURCE_URL = "https://github.com/42SK/TVKILL"
     private const val LICENSE = "GPL-3.0-or-later"
 
+    /**
+     * Source for project-generated COMMUNITY patterns: the universal TV code
+     * list bundled with Flipper Zero firmware (GPL-3.0).
+     */
+    private const val COMMUNITY_SOURCE_URL =
+        "https://github.com/flipperdevices/flipperzero-firmware/blob/dev/applications/main/infrared/resources/infrared/assets/tv.ir"
+
     private fun powerOff(carrierHz: Int, periods: IntArray, model: String? = null) = IrPattern(
         carrierHz = carrierHz,
         periods = periods,
@@ -48,6 +55,31 @@ object LegacyCatalog {
         sourceUrl = SOURCE_URL,
         license = LICENSE,
         confidence = Confidence.IMPORTED,
+        model = model,
+    )
+
+    /**
+     * COMMUNITY patterns are project-generated from a properly-licensed public
+     * code list (see [COMMUNITY_SOURCE_URL]) and are best-effort until verified
+     * on real hardware.
+     */
+    private fun communityPowerOff(carrierHz: Int, periods: IntArray, model: String? = null) = IrPattern(
+        carrierHz = carrierHz,
+        periods = periods,
+        function = PatternFunction.POWER_OFF,
+        sourceUrl = COMMUNITY_SOURCE_URL,
+        license = LICENSE,
+        confidence = Confidence.COMMUNITY,
+        model = model,
+    )
+
+    private fun communityMute(carrierHz: Int, periods: IntArray, model: String? = null) = IrPattern(
+        carrierHz = carrierHz,
+        periods = periods,
+        function = PatternFunction.MUTE,
+        sourceUrl = COMMUNITY_SOURCE_URL,
+        license = LICENSE,
+        confidence = Confidence.COMMUNITY,
         model = model,
     )
 
@@ -202,6 +234,32 @@ object LegacyCatalog {
         ),
     )
 
+    /**
+     * Coocaa is Skyworth's smart-TV brand (confirmed: rebranded Skyworth).
+     * No Skyworth/Coocaa power code exists in TV-B-Gone, LIRC or Tasmota, so
+     * these NEC patterns were generated from the most common NEC TV power
+     * commands in the Flipper Zero universal TV list (GPL-3.0, from
+     * https://github.com/flipperdevices/flipperzero-firmware, file
+     * applications/main/infrared/resources/infrared/assets/tv.ir).
+     * They are COMMUNITY confidence / best-effort until verified on real
+     * Coocaa hardware (M5).
+     */
+    private val coocaa = Brand(
+        id = "coocaa",
+        displayName = "Coocaa (Skyworth)",
+        region = Brand.Region.MAINSTREAM,
+        patterns = listOf(
+            communityPowerOff(38461, intArrayOf(342, 171, 21, 21, 21, 21, 21, 21, 21, 21, 21, 64, 21, 21, 21, 21, 21, 21, 21, 64, 21, 64, 21, 64, 21, 64, 21, 21, 21, 64, 21, 64, 21, 64, 21, 21, 21, 21, 21, 21, 21, 21, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 21, 21, 21, 21, 21, 21, 21, 21, 1022), model = "NEC addr 0x08 cmd 0x0F"),
+            communityPowerOff(38461, intArrayOf(342, 171, 21, 21, 21, 21, 21, 21, 21, 21, 21, 64, 21, 21, 21, 21, 21, 21, 21, 64, 21, 64, 21, 64, 21, 64, 21, 21, 21, 64, 21, 64, 21, 64, 21, 21, 21, 21, 21, 21, 21, 64, 21, 21, 21, 21, 21, 64, 21, 21, 21, 64, 21, 64, 21, 64, 21, 21, 21, 64, 21, 64, 21, 21, 21, 64, 21, 1022), model = "NEC addr 0x08 cmd 0x12"),
+            communityPowerOff(38461, intArrayOf(342, 171, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 64, 21, 21, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 21, 21, 21, 21, 21, 21, 64, 21, 21, 21, 21, 21, 64, 21, 21, 21, 64, 21, 64, 21, 64, 21, 21, 21, 64, 21, 64, 21, 21, 21, 64, 21, 1022), model = "NEC addr 0x40 cmd 0x12"),
+            communityPowerOff(38461, intArrayOf(342, 171, 21, 21, 21, 21, 21, 64, 21, 64, 21, 64, 21, 21, 21, 21, 21, 21, 21, 64, 21, 64, 21, 21, 21, 21, 21, 21, 21, 64, 21, 64, 21, 64, 21, 21, 21, 21, 21, 21, 21, 64, 21, 21, 21, 21, 21, 64, 21, 21, 21, 64, 21, 64, 21, 64, 21, 21, 21, 64, 21, 64, 21, 21, 21, 64, 21, 1022), model = "NEC addr 0x38 cmd 0x12"),
+            communityPowerOff(38461, intArrayOf(342, 171, 21, 21, 21, 21, 21, 21, 21, 64, 21, 21, 21, 64, 21, 64, 21, 21, 21, 64, 21, 64, 21, 64, 21, 21, 21, 64, 21, 21, 21, 21, 21, 64, 21, 21, 21, 21, 21, 21, 21, 21, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 21, 21, 21, 21, 21, 21, 21, 21, 1022), model = "NEC addr 0x16 cmd 0x0F"),
+            communityMute(38461, intArrayOf(342, 171, 21, 21, 21, 64, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 64, 21, 21, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 21, 21, 21, 21, 21, 21, 64, 21, 21, 21, 21, 21, 21, 21, 21, 21, 64, 21, 64, 21, 64, 21, 21, 21, 64, 21, 64, 21, 64, 21, 64, 21, 1022), model = "NEC addr 0x40 cmd 0x10"),
+            communityMute(38461, intArrayOf(342, 171, 21, 21, 21, 21, 21, 64, 21, 64, 21, 64, 21, 21, 21, 21, 21, 21, 21, 64, 21, 64, 21, 21, 21, 21, 21, 21, 21, 64, 21, 64, 21, 64, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 64, 21, 21, 21, 21, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 21, 21, 64, 21, 64, 21, 1022), model = "NEC addr 0x38 cmd 0x04"),
+            communityMute(38461, intArrayOf(342, 171, 21, 21, 21, 64, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 64, 21, 21, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 21, 21, 21, 21, 21, 21, 64, 21, 21, 21, 64, 21, 21, 21, 21, 21, 64, 21, 64, 21, 64, 21, 21, 21, 64, 21, 21, 21, 64, 21, 64, 21, 1022), model = "NEC addr 0x40 cmd 0x14"),
+        ),
+    )
+
     private val aoc = Brand(
         id = "aoc",
         displayName = "AOC",
@@ -218,6 +276,6 @@ object LegacyCatalog {
      */
     val brands: List<Brand> = listOf(
         samsung, sony, lg, panasonic, philips, nec, sharp, jvc, toshiba,
-        mitsubishi, vizio, rca, pioneer, hisense, akai, aoc,
+        mitsubishi, vizio, rca, pioneer, hisense, akai, aoc, coocaa,
     )
 }

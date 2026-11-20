@@ -20,8 +20,8 @@ class CatalogRepositoryTest {
     private val repository = CatalogRepository()
 
     @Test
-    fun exposesAllSixteenLegacyBrands() {
-        assertEquals(16, repository.brands().size)
+    fun exposesAllSeventeenLegacyBrands() {
+        assertEquals(17, repository.brands().size)
     }
 
     @Test
@@ -35,7 +35,7 @@ class CatalogRepositoryTest {
         val expected = setOf(
             "samsung", "sony", "lg", "panasonic", "philips", "nec", "sharp",
             "jvc", "toshiba", "mitsubishi", "vizio", "rca", "pioneer",
-            "hisense", "akai", "aoc",
+            "hisense", "akai", "aoc", "coocaa",
         )
         assertEquals(expected, repository.brands().map { it.id }.toSet())
     }
@@ -59,9 +59,29 @@ class CatalogRepositoryTest {
     }
 
     @Test
-    fun legacyPatternsAreMarkedImported() {
-        repository.brands().flatMap { it.patterns }.forEach { pattern ->
-            assertEquals(Confidence.IMPORTED, pattern.confidence)
+    fun patternsHaveExpectedConfidence() {
+        // Upstream TV-B-Gone-derived patterns are IMPORTED; the project-generated
+        // Coocaa (Skyworth) patterns from the Flipper Zero list are COMMUNITY
+        // until verified on real hardware.
+        repository.brands().forEach { brand ->
+            brand.patterns.forEach { pattern ->
+                val isExpected = pattern.confidence == Confidence.IMPORTED ||
+                    (pattern.confidence == Confidence.COMMUNITY && brand.id == "coocaa")
+                assertTrue(
+                    "Unexpected confidence ${pattern.confidence} in brand ${brand.id}",
+                    isExpected,
+                )
+            }
+        }
+    }
+
+    @Test
+    fun coocaaPatternsAreCommunityConfidence() {
+        val coocaa = repository.brand("coocaa")
+        assertNotNull(coocaa)
+        assertTrue(coocaa!!.patterns.isNotEmpty())
+        coocaa.patterns.forEach { pattern ->
+            assertEquals(Confidence.COMMUNITY, pattern.confidence)
         }
     }
 
@@ -92,6 +112,8 @@ class CatalogRepositoryTest {
     fun brandLookupByIdWorks() {
         assertNotNull(repository.brand("samsung"))
         assertEquals("Samsung", repository.brand("samsung")?.displayName)
+        assertNotNull(repository.brand("coocaa"))
+        assertEquals("Coocaa (Skyworth)", repository.brand("coocaa")?.displayName)
         assertEquals(null, repository.brand("does-not-exist"))
     }
 }

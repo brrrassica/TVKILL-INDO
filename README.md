@@ -32,7 +32,7 @@ The application ID is `tech.alatcerdas.tvkillindo`. It is **different** from ups
 
 Upstream ships 16 brands (Samsung, Sony, LG, Panasonic, Philips, NEC, Sharp, JVC, Toshiba, Mitsubishi, Vizio, RCA, Pioneer, Hisense, Akai, AOC).
 
-The 2.0-indo catalog adds TVs commonly found in the Indonesian market, including **Polytron, Changhong / CHiQ, TCL, Coocaa (Skyworth), Ikon, Hisense, Sharp, Akari, Konka, Haier, Xiaomi/Redmi, AQUA, Mito, SPC and Sansui**. Patterns are imported from attributed public databases (LIRC, IRDB, Tasmota code lists and manufacturer documentation); see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Imported codes may be marked *best-effort* until verified on real hardware. Wi-Fi control of smart TVs is planned for a later 2.x milestone, not 2.0-indo.
+The 2.0.1-indo catalog adds TVs commonly found in the Indonesian market, including **Polytron, Changhong / CHiQ, TCL, Coocaa (Skyworth), Ikon, Hisense, Sharp, Akari, Konka, Haier, Xiaomi/Redmi, AQUA, Mito, SPC and Sansui**. Patterns are imported from attributed public sources (LIRC, Tasmota code lists, the GPL-3.0 Flipper Zero universal TV list and manufacturer documentation); see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Imported codes may be marked *best-effort* until verified on real hardware. Wi-Fi control of smart TVs is planned for a later 2.x milestone, not 2.0.x-indo.
 
 ## Build from source
 

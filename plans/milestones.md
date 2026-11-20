@@ -56,8 +56,8 @@ TCL, Hisense, Coocaa and Polytron are repeatedly called out in the IDR 3–7 jut
 ### 3.2 Pattern data sources
 
 - [LIRC remotes database](https://lirc-remotes.sourceforge.net/) and the [probonopd/lirc-remotes](https://github.com/probonopd/lirc-remotes) Pronto-Hex conversion.
-- [probonopd/irdb](https://github.com/probonopd/irdb) — protocol/device/subdevice/function CSV data with an explicit [license](https://github.com/probonopd/irdb/blob/master/LICENSE.md) that must be honored.
 - [Tasmota IR code list](https://tasmota.github.io/docs/Codes-for-IR-Remotes) — convenient NEC/RC5-style power codes.
+- [Flipper Zero universal TV list](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/applications/main/infrared/resources/infrared/assets/tv.ir) — GPL-3.0, license-compatible; used for the Coocaa (Skyworth) NEC patterns.
 - [Hisense discrete IR commands PDF](https://assets.hisense-usa.com/assets/ProductDownloads/16/c995389f20/Hisense-Discrete-IR-Commands-for-copy-paste_0.pdf) — discrete ON/OFF (not just toggle), valuable for reliability.
 - Upstream unmerged PRs #49/#50 (JSON pattern DB, TV-B-Gone NA/EU codes) are a design reference, not code to copy blindly.
 
@@ -173,7 +173,7 @@ Effort key: **S** ≈ days, **M** ≈ 1–2 weeks, **L** ≈ multiple weeks. Ord
 
 - Move all patterns out of `BrandContainer.kt` into a versioned, app-bundled data file (JSON or CSV — decide in this milestone; must be parsed at runtime without network access).
 - Schema per record at minimum: `brand`, `model/family (optional)`, `protocol`, `carrierHz`, `timings` (or code words), `function` (power_off / mute), `sourceUrl`, `license`, `confidence` (verified / community / imported), `addedOn`.
-- Write an offline import/conversion tool for the §3.2 sources: LIRC, IRDB CSV, Tasmota NEC codes, Hisense discrete-code PDF; convert Pronto/NEC representations into the app's timing format with unit tests against known vectors.
+- Write an offline import/conversion tool for the §3.2 sources: LIRC, Tasmota NEC codes, Flipper Zero universal TV list, Hisense discrete-code PDF; convert Pronto/NEC representations into the app's timing format with unit tests against known vectors. IRDB is excluded (license rejected).
 - Deduplicate and order patterns by reliability (best first, as the upstream wiki recommends); cap per-transmission count and keep universal-mode duration reasonable.
 - **License/attribution gate:** review each source's terms, add `THIRD_PARTY_NOTICES`/`LICENSES` file, and drop any source whose terms conflict with GPLv3 redistribution.
 - Preserve the existing 16 brands' patterns in the new format and verify no regressions against the LG V20/Vivo Y29 4G.

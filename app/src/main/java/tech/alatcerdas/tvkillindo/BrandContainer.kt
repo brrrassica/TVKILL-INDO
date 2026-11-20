@@ -157,6 +157,33 @@ object BrandContainer {
             Pattern(intArrayOf(38343, 1, 1, 343, 172, 21, 22, 21, 22, 21, 22, 21, 22, 21, 22, 21, 22, 21, 65, 21, 22, 21, 65, 21, 22, 21, 65, 21, 65, 21, 65, 21, 65, 21, 22, 21, 65, 21, 65, 21, 22, 21, 22, 21, 22, 21, 65, 21, 22, 21, 22, 21, 22, 21, 22, 21, 65, 21, 65, 21, 65, 21, 22, 21, 65, 21, 65, 21, 65, 21, 4907))
     )
 
+    /**
+     * Coocaa is Skyworth's smart-TV brand (confirmed: rebranded Skyworth).
+     * No Skyworth/Coocaa power code exists in TV-B-Gone, LIRC or Tasmota, so
+     * these NEC patterns were generated from the most common NEC TV power
+     * commands in the Flipper Zero universal TV list (GPL-3.0, from
+     * https://github.com/flipperdevices/flipperzero-firmware, file
+     * applications/main/infrared/resources/infrared/assets/tv.ir).
+     * Best-effort / COMMUNITY confidence until verified on real Coocaa
+     * hardware (M5).
+     */
+    private val coocaa = Brand(
+            "coocaa",
+            arrayOf(
+                    //NEC addr 0x08 cmd 0x0F
+                    Pattern(38461, intArrayOf(342, 171, 21, 21, 21, 21, 21, 21, 21, 21, 21, 64, 21, 21, 21, 21, 21, 21, 21, 64, 21, 64, 21, 64, 21, 64, 21, 21, 21, 64, 21, 64, 21, 64, 21, 21, 21, 21, 21, 21, 21, 21, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 21, 21, 21, 21, 21, 21, 21, 21, 1022)),
+                    //NEC addr 0x08 cmd 0x12
+                    Pattern(38461, intArrayOf(342, 171, 21, 21, 21, 21, 21, 21, 21, 21, 21, 64, 21, 21, 21, 21, 21, 21, 21, 64, 21, 64, 21, 64, 21, 64, 21, 21, 21, 64, 21, 64, 21, 64, 21, 21, 21, 21, 21, 21, 21, 64, 21, 21, 21, 21, 21, 64, 21, 21, 21, 64, 21, 64, 21, 64, 21, 21, 21, 64, 21, 64, 21, 21, 21, 64, 21, 1022)),
+                    //NEC addr 0x40 cmd 0x12
+                    Pattern(38461, intArrayOf(342, 171, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 64, 21, 21, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 21, 21, 21, 21, 21, 21, 64, 21, 21, 21, 21, 21, 64, 21, 21, 21, 64, 21, 64, 21, 64, 21, 21, 21, 64, 21, 64, 21, 21, 21, 64, 21, 1022)),
+                    //NEC addr 0x38 cmd 0x12
+                    Pattern(38461, intArrayOf(342, 171, 21, 21, 21, 21, 21, 64, 21, 64, 21, 64, 21, 21, 21, 21, 21, 21, 21, 64, 21, 64, 21, 21, 21, 21, 21, 21, 21, 64, 21, 64, 21, 64, 21, 21, 21, 21, 21, 21, 21, 64, 21, 21, 21, 21, 21, 64, 21, 21, 21, 64, 21, 64, 21, 64, 21, 21, 21, 64, 21, 64, 21, 21, 21, 64, 21, 1022)),
+                    //NEC addr 0x16 cmd 0x0F
+                    Pattern(38461, intArrayOf(342, 171, 21, 21, 21, 21, 21, 21, 21, 64, 21, 21, 21, 64, 21, 64, 21, 21, 21, 64, 21, 64, 21, 64, 21, 21, 21, 64, 21, 21, 21, 21, 21, 64, 21, 21, 21, 21, 21, 21, 21, 21, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 21, 21, 21, 21, 21, 21, 21, 21, 1022))),
+            //Mute-pattern: NEC addr 0x40 cmd 0x10
+            Pattern(intArrayOf(38461, 342, 171, 21, 21, 21, 64, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 64, 21, 21, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 64, 21, 21, 21, 21, 21, 21, 21, 64, 21, 21, 21, 21, 21, 21, 21, 21, 21, 64, 21, 64, 21, 64, 21, 21, 21, 64, 21, 64, 21, 64, 21, 64, 21, 1022))
+    )
+
     private val aoc = Brand(
             "aoc",
             arrayOf(
@@ -167,7 +194,7 @@ object BrandContainer {
     )
 
     @JvmStatic
-    val allBrands = arrayOf(samsung, sony, lg, panasonic, philips, nec, sharp, jvc, toshiba, mitsubishi, vizio, rca, pioneer, hisense, akai, aoc)
+    val allBrands = arrayOf(samsung, sony, lg, panasonic, philips, nec, sharp, jvc, toshiba, mitsubishi, vizio, rca, pioneer, hisense, akai, aoc, coocaa)
 
     val brandByDesignation: Map<String, Brand> by lazy {
         val result = HashMap<String, Brand>()
