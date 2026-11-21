@@ -33,6 +33,13 @@ public class Transmitter {
     public void transmit(Context context) {
         ConsumerIrManager IR = (ConsumerIrManager) context.getSystemService(Context.CONSUMER_IR_SERVICE);
 
+        // The manifest declares the IR feature as optional, so this can be
+        // null (or lack an emitter) on devices without an IR blaster. Skip
+        // the transmission instead of crashing (issue #4).
+        if (IR == null || !IR.hasIrEmitter()) {
+            return;
+        }
+
         IR.transmit(frequency, pattern);
     }
 }

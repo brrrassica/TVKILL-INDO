@@ -86,7 +86,10 @@ fun RepetitiveScreen(
     hasIrEmitter: Boolean = true,
     controller: RepetitiveTransmissionController? = null,
 ) {
-    var state by rememberSaveable(brands) { mutableStateOf(RepetitiveState(brands = brands)) }
+    // RepetitiveState holds List<Brand>, which is not Bundle-storable; the
+    // whole state is derivable from `brands`, so plain remember is correct
+    // (issue #2).
+    var state by remember(brands) { mutableStateOf(RepetitiveState(brands = brands)) }
     var running by remember { mutableStateOf(false) }
     var stopping by remember { mutableStateOf(false) }
     var additionalPatterns by rememberSaveable { mutableStateOf(additionalPatternsDefault) }

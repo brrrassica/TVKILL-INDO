@@ -182,7 +182,12 @@ class TransmitService : Service() {
     override fun onDestroy() {
         super.onDestroy()
 
-        wakeLock.release()
+        // The wake lock was acquired with a timeout; if it already elapsed the
+        // system released it and an unconditional release() would throw
+        // "WakeLock under-locked" (issue #5).
+        if (wakeLock.isHeld) {
+            wakeLock.release()
+        }
 
         status.removeObserver(statusObserver)
 

@@ -86,16 +86,34 @@ class ShellViewModel : ViewModel() {
         showMute = settings.preferences.getBoolean("show_mute", false)
     }
 
+    // Controllers are cached per ViewModel instance: their cancellation flags
+    // are instance-local, so recreating them per recomposition would leave
+    // running transmissions unstoppable (issue #3).
     private var repetitiveControllerRef: RepetitiveTransmissionController? = null
+    private var universalControllerRef: UniversalTransmissionController? = null
+    private var brandControllerRef: BrandTransmissionController? = null
 
     fun repetitiveController(transport: ConsumerIrTvTransport): RepetitiveTransmissionController =
         repetitiveControllerRef ?: RepetitiveTransmissionController(transport).also {
             repetitiveControllerRef = it
         }
 
+    fun universalController(transport: ConsumerIrTvTransport): UniversalTransmissionController =
+        universalControllerRef ?: UniversalTransmissionController(transport).also {
+            universalControllerRef = it
+        }
+
+    fun brandController(transport: ConsumerIrTvTransport): BrandTransmissionController =
+        brandControllerRef ?: BrandTransmissionController(transport).also {
+            brandControllerRef = it
+        }
+
     override fun onCleared() {
         super.onCleared()
         repetitiveControllerRef?.cancel()
+        universalControllerRef?.cancel()
+        // BrandTransmissionController is synchronous (no long-running run),
+        // so it needs no cancellation on teardown.
     }
 }
 
@@ -124,6 +142,9 @@ class ComposeShellActivity : ComponentActivity() {
         // always use the latest values (upstream issue #52).
         val settingsController = SettingsController(SharedPreferencesSettingsStore(this))
 
+        val universalController = shellViewModel.universalController(transport)
+        val brandController = shellViewModel.brandController(transport)
+
         setContent {
             TvkillIndoTheme {
                 ComposeShell(
@@ -133,6 +154,8 @@ class ComposeShellActivity : ComponentActivity() {
                     delayMillis = shellViewModel.delayMillis,
                     showMute = shellViewModel.showMute,
                     transport = transport,
+                    universalController = universalController,
+                    brandController = brandController,
                     repetitiveController = shellViewModel.repetitiveController(transport),
                     settingsController = settingsController,
                     onSettingsChanged = {
@@ -169,6 +192,8 @@ fun ComposeShell(
     delayMillis: Long,
     showMute: Boolean,
     transport: ConsumerIrTvTransport,
+    universalController: UniversalTransmissionController,
+    brandController: BrandTransmissionController,
     repetitiveController: RepetitiveTransmissionController,
     settingsController: SettingsController,
     onSettingsChanged: () -> Unit,
@@ -216,7 +241,7 @@ fun ComposeShell(
                     delayMillis = delayMillis,
                     hasIrEmitter = hasIrEmitter,
                     showMute = showMute,
-                    controller = UniversalTransmissionController(transport),
+                    controller = universalController,
                 )
             }
             composable(ShellTab.BRANDS.route) {
@@ -224,7 +249,7 @@ fun ComposeShell(
                     brands = brands,
                     hasIrEmitter = hasIrEmitter,
                     showMute = showMute,
-                    controller = BrandTransmissionController(transport),
+                    controller = brandController,
                 )
             }
             composable(ShellTab.REPETITIVE.route) {
