@@ -14,15 +14,19 @@ import androidx.core.content.ContextCompat
 import tech.alatcerdas.tvkillindo.domain.IrPattern
 
 /** IR transport backed by the platform ConsumerIrManager (API 19+). */
-class ConsumerIrTvTransport(private val context: Context) : TvTransport {
+class ConsumerIrTvTransport(context: Context) : TvTransport {
+    // Hold application context only: this transport may be cached in a
+    // ViewModel-scoped controller that outlives the Activity (issue #7).
+    private val appContext: Context = context.applicationContext
+
     override val id: String = "ir"
     override val displayName: String = "Infrared (IR blaster)"
 
     override fun isAvailable(): Boolean =
-        ContextCompat.getSystemService(context, ConsumerIrManager::class.java)?.hasIrEmitter() == true
+        ContextCompat.getSystemService(appContext, ConsumerIrManager::class.java)?.hasIrEmitter() == true
 
     override fun send(pattern: IrPattern): Result<Unit> = runCatching {
-        val manager = ContextCompat.getSystemService(context, ConsumerIrManager::class.java)
+        val manager = ContextCompat.getSystemService(appContext, ConsumerIrManager::class.java)
             ?: error("ConsumerIrManager is not available on this device")
         check(manager.hasIrEmitter()) { "This device has no IR blaster" }
         manager.transmit(pattern.carrierHz, pattern.toMicroseconds())
