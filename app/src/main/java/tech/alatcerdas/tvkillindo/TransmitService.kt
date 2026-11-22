@@ -128,6 +128,9 @@ class TransmitService : Service() {
         updateNotification()
         UpdateWidget.updateAllWidgets(this)
     }
+    private val foregroundObserver = Observer<Boolean> {
+        updateNotification()
+    }
     private var stopped = false
     private var pendingRequests = 0
 
@@ -172,26 +175,26 @@ class TransmitService : Service() {
         }
 
         status.observeForever(statusObserver)
-        isAppInForeground.observeForever {
-            updateNotification()
-        }
+        isAppInForeground.observeForever(foregroundObserver)
 
-        wakeLock.acquire(10 * 60 * 1000L /*10 minutes*/)
+        // Keep a partial wake lock for the whole active service lifetime so the CPU stays
+        // awake between transmissions in repetitive/all-brands mode, including forever
+        // requests. It is released in onDestroy() once the service is stopped/cancelled.
+        wakeLock.acquire()
     }
 
     override fun onDestroy() {
         super.onDestroy()
 
-        // The wake lock was acquired with a timeout; if it already elapsed the
-        // system released it and an unconditional release() would throw
-        // "WakeLock under-locked" (issue #5).
         if (wakeLock.isHeld) {
             wakeLock.release()
         }
 
         status.removeObserver(statusObserver)
+        isAppInForeground.removeObserver(foregroundObserver)
 
         cancel()
+        executor.shutdownNow()
         status.value = null
         stopped = true
 
