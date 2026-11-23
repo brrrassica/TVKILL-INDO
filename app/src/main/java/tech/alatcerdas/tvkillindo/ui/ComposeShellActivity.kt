@@ -32,6 +32,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -68,16 +70,16 @@ class ShellViewModel : ViewModel() {
 
     val brands: List<tech.alatcerdas.tvkillindo.domain.Brand> = repository.brands()
 
-    /** Additional-patterns preference (legacy "depth" key). Loaded once. */
-    var additionalPatterns: Boolean = false
+    /** Additional-patterns preference (legacy "depth" key). Observable for Compose. */
+    var additionalPatterns: Boolean by mutableStateOf(false)
         private set
 
-    /** Delay between patterns in milliseconds (legacy "delay" key). Loaded once. */
-    var delayMillis: Long = 0L
+    /** Delay between patterns in milliseconds (legacy "delay" key). Observable for Compose. */
+    var delayMillis: Long by mutableStateOf(0L)
         private set
 
-    /** Experimental mute visibility (legacy "show_mute" key). Loaded once. */
-    var showMute: Boolean = false
+    /** Experimental mute visibility (legacy "show_mute" key). Observable for Compose. */
+    var showMute: Boolean by mutableStateOf(false)
         private set
 
     fun loadSettings(settings: Settings) {
