@@ -24,6 +24,8 @@ import tech.alatcerdas.tvkillindo.domain.IrPattern
 import tech.alatcerdas.tvkillindo.domain.IrPattern.Confidence
 import tech.alatcerdas.tvkillindo.domain.IrPattern.PatternFunction
 import tech.alatcerdas.tvkillindo.transport.TvTransport
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 class RepetitiveTransmissionControllerTest {
 
@@ -90,15 +92,27 @@ class RepetitiveTransmissionControllerTest {
 
     @Test
     fun explicitCancelHookStopsTheLoop() {
-        val transport = FakeTransport()
+        val sendStarted = CountDownLatch(1)
+        val allowReturn = CountDownLatch(1)
+        val transport = object : TvTransport {
+            val sent = mutableListOf<IrPattern>()
+            override val id: String = "fake"
+            override val displayName: String = "Fake"
+            override fun isAvailable(): Boolean = true
+            override fun send(pattern: IrPattern): Result<Unit> {
+                sent += pattern
+                sendStarted.countDown()
+                allowReturn.await(5, TimeUnit.SECONDS)
+                return Result.success(Unit)
+            }
+        }
         val controller = RepetitiveTransmissionController(transport)
-        // Stop right after the first pattern of the first round
         val rounds = mutableListOf<Int>()
 
         Thread {
-            // let the loop start, then cancel mid-round
-            while (transport.sent.isEmpty()) Thread.yield()
+            assertTrue(sendStarted.await(5, TimeUnit.SECONDS))
             controller.cancel()
+            allowReturn.countDown()
         }.start()
 
         val outcome = controller.transmit(
