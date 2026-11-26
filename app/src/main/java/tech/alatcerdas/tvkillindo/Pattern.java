@@ -55,6 +55,16 @@ public class Pattern {
         this.pattern = Arrays.copyOfRange(ircode, 1, ircode.length);
     }
 
+    // public accessors so unit tests can verify the catalog data
+    // (issues #15/#16/#18) without changing emission behavior
+    public int rawFrequency() {
+        return frequency;
+    }
+
+    public int[] rawPattern() {
+        return pattern;
+    }
+
 
     /*
      * The following method performs calculations on the IR-codes in order to make them
