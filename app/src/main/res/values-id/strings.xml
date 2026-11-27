@@ -9,4 +9,5 @@
 -->
 <resources>
     <!-- Add translated <string name="..."> entries here. -->
+    <string name="toast_notification_permission_denied">Notification permission is needed to show the stop button while transmitting in the background.</string>
 </resources>

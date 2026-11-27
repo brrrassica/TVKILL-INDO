@@ -32,6 +32,7 @@
     <!-- Transmission toast -->
     <string name="toast_transmission_initiated">Transmitting patterns…</string>
     <string name="toast_transmission_completed">Transmission completed!</string>
+    <string name="toast_notification_permission_denied">Notification permission is needed to show the stop button while transmitting in the background.</string>
 
     <!-- Blaster Found toast -->
     <string name="toast_found">IR blaster found</string>

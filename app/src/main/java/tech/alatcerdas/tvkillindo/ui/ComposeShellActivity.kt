@@ -16,13 +16,19 @@
  */
 package tech.alatcerdas.tvkillindo.ui
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.hardware.ConsumerIrManager
+import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -129,8 +135,18 @@ class ComposeShellActivity : ComponentActivity() {
 
     private val shellViewModel: ShellViewModel by viewModels()
 
+    private val requestNotificationPermission = registerForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        if (!granted) {
+            Toast.makeText(this, R.string.toast_notification_permission_denied, Toast.LENGTH_LONG).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        maybeRequestNotificationPermission()
 
         val irManager = getSystemService(Context.CONSUMER_IR_SERVICE) as? ConsumerIrManager
         val hasIrEmitter = irManager != null && irManager.hasIrEmitter()
@@ -166,6 +182,17 @@ class ComposeShellActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    private fun maybeRequestNotificationPermission() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        if (
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        requestNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 
     companion object {
