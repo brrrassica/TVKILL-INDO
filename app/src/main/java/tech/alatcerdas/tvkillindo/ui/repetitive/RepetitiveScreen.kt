@@ -40,6 +40,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -93,12 +94,17 @@ fun RepetitiveScreen(
     var running by remember { mutableStateOf(false) }
     var stopping by remember { mutableStateOf(false) }
     var additionalPatterns by rememberSaveable { mutableStateOf(additionalPatternsDefault) }
+    LaunchedEffect(additionalPatternsDefault) { additionalPatterns = additionalPatternsDefault }
     var rounds by remember { mutableStateOf(0) }
     var pendingOutcome by remember { mutableStateOf<RepetitiveOutcome?>(null) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val progressChannel = remember { Channel<RoundProgress>(Channel.CONFLATED) }
+
+    DisposableEffect(controller) {
+        onDispose { controller?.cancel() }
+    }
 
     LaunchedEffect(progressChannel) {
         for (progress in progressChannel) {
@@ -179,6 +185,7 @@ fun RepetitiveScreen(
 
                 Button(
                     onClick = {
+                        controller?.reset()
                         running = true
                         stopping = false
                         rounds = 0

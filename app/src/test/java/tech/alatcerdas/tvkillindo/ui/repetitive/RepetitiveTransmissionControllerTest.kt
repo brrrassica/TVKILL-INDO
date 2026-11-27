@@ -189,4 +189,39 @@ class RepetitiveTransmissionControllerTest {
         assertEquals(RepetitiveOutcome.NoPatterns, outcome)
         assertTrue(transport.sent.isEmpty())
     }
+
+    @Test
+    fun cancelBeforeTransmitIsHonored() {
+        val transport = FakeTransport()
+        val controller = RepetitiveTransmissionController(transport)
+        controller.cancel()
+
+        val outcome = controller.transmit(
+            listOf(brand("samsung", powerOff())),
+            additionalPatterns = false,
+            delayMillis = 0,
+        )
+
+        assertEquals(RepetitiveOutcome.Stopped(0), outcome)
+        assertTrue(transport.sent.isEmpty())
+    }
+
+    @Test
+    fun resetClearsPreviousCancel() {
+        val transport = FakeTransport()
+        val controller = RepetitiveTransmissionController(transport) {
+            transport.sent.size >= 1
+        }
+        controller.cancel()
+        controller.reset()
+
+        val outcome = controller.transmit(
+            listOf(brand("samsung", powerOff())),
+            additionalPatterns = false,
+            delayMillis = 0,
+        )
+
+        assertEquals(RepetitiveOutcome.Stopped(1), outcome)
+        assertEquals(1, transport.sent.size)
+    }
 }

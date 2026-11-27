@@ -58,10 +58,22 @@ class UniversalTransmissionController(
 
     /** Thread-safe cancellation hook, driven by the screen's CANCEL button. */
     private val cancelFlag = AtomicBoolean(false)
+    private val running = AtomicBoolean(false)
 
     /** Requests cancellation of the currently running sequence (if any). */
     fun cancel() {
         cancelFlag.set(true)
+    }
+
+    /**
+     * Clears a previous cancellation so the next [transmit]/[transmitMute] call
+     * can run. Must be called before starting a new run (and before the UI
+     * reports it as running) so a CANCEL that lands in the launch window cannot
+     * be overwritten. A still-running sequence keeps its cancel flag so a stale
+     * run cannot be revived.
+     */
+    fun reset() {
+        if (!running.get()) cancelFlag.set(false)
     }
 
     /**
@@ -74,32 +86,36 @@ class UniversalTransmissionController(
         delayMillis: Long,
         onProgress: (sent: Int, total: Int) -> Unit = { _, _ -> },
     ): UniversalOutcome {
-        val steps = UniversalSequence.build(brands, additionalPatterns)
-        if (steps.isEmpty()) return UniversalOutcome.NoPatterns
-        if (!transport.isAvailable()) return UniversalOutcome.TransportUnavailable
+        if (!running.compareAndSet(false, true)) return UniversalOutcome.Cancelled(0)
+        try {
+            val steps = UniversalSequence.build(brands, additionalPatterns)
+            if (steps.isEmpty()) return UniversalOutcome.NoPatterns
+            if (!transport.isAvailable()) return UniversalOutcome.TransportUnavailable
 
-        var sent = 0
-        cancelFlag.set(false)
-        onProgress(0, steps.size)
-        for (step in steps) {
-            if (cancelFlag.get() || isCancelled()) return UniversalOutcome.Cancelled(sent)
-            transport.send(step.pattern).fold(
-                onSuccess = {
-                    sent++
-                    onProgress(sent, steps.size)
-                },
-                onFailure = { return UniversalOutcome.Error(it.message ?: it.javaClass.simpleName, sent) },
-            )
-            if (delayMillis > 0) {
-                try {
-                    Thread.sleep(delayMillis)
-                } catch (_: InterruptedException) {
-                    Thread.currentThread().interrupt()
-                    return UniversalOutcome.Cancelled(sent)
+            var sent = 0
+            onProgress(0, steps.size)
+            for (step in steps) {
+                if (cancelFlag.get() || isCancelled()) return UniversalOutcome.Cancelled(sent)
+                transport.send(step.pattern).fold(
+                    onSuccess = {
+                        sent++
+                        onProgress(sent, steps.size)
+                    },
+                    onFailure = { return UniversalOutcome.Error(it.message ?: it.javaClass.simpleName, sent) },
+                )
+                if (delayMillis > 0) {
+                    try {
+                        Thread.sleep(delayMillis)
+                    } catch (_: InterruptedException) {
+                        Thread.currentThread().interrupt()
+                        return UniversalOutcome.Cancelled(sent)
+                    }
                 }
             }
+            return UniversalOutcome.Completed(sent)
+        } finally {
+            running.set(false)
         }
-        return UniversalOutcome.Completed(sent)
     }
 
     /**
@@ -112,32 +128,36 @@ class UniversalTransmissionController(
         delayMillis: Long,
         onProgress: (sent: Int, total: Int) -> Unit = { _, _ -> },
     ): UniversalOutcome {
-        val steps = UniversalSequence.muteSequence(brands)
-        if (steps.isEmpty()) return UniversalOutcome.NoPatterns
-        if (!transport.isAvailable()) return UniversalOutcome.TransportUnavailable
+        if (!running.compareAndSet(false, true)) return UniversalOutcome.Cancelled(0)
+        try {
+            val steps = UniversalSequence.muteSequence(brands)
+            if (steps.isEmpty()) return UniversalOutcome.NoPatterns
+            if (!transport.isAvailable()) return UniversalOutcome.TransportUnavailable
 
-        var sent = 0
-        cancelFlag.set(false)
-        onProgress(0, steps.size)
-        for (step in steps) {
-            if (cancelFlag.get() || isCancelled()) return UniversalOutcome.Cancelled(sent)
-            transport.send(step.pattern).fold(
-                onSuccess = {
-                    sent++
-                    onProgress(sent, steps.size)
-                },
-                onFailure = { return UniversalOutcome.Error(it.message ?: it.javaClass.simpleName, sent) },
-            )
-            if (delayMillis > 0) {
-                try {
-                    Thread.sleep(delayMillis)
-                } catch (_: InterruptedException) {
-                    Thread.currentThread().interrupt()
-                    return UniversalOutcome.Cancelled(sent)
+            var sent = 0
+            onProgress(0, steps.size)
+            for (step in steps) {
+                if (cancelFlag.get() || isCancelled()) return UniversalOutcome.Cancelled(sent)
+                transport.send(step.pattern).fold(
+                    onSuccess = {
+                        sent++
+                        onProgress(sent, steps.size)
+                    },
+                    onFailure = { return UniversalOutcome.Error(it.message ?: it.javaClass.simpleName, sent) },
+                )
+                if (delayMillis > 0) {
+                    try {
+                        Thread.sleep(delayMillis)
+                    } catch (_: InterruptedException) {
+                        Thread.currentThread().interrupt()
+                        return UniversalOutcome.Cancelled(sent)
+                    }
                 }
             }
+            return UniversalOutcome.Completed(sent)
+        } finally {
+            running.set(false)
         }
-        return UniversalOutcome.Completed(sent)
     }
 
 }

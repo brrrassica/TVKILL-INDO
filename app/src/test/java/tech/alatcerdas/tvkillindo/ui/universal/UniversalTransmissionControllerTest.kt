@@ -204,4 +204,52 @@ class UniversalTransmissionControllerTest {
         assertEquals(UniversalOutcome.Cancelled(1), outcome)
         assertEquals(1, transport.sent.size)
     }
+
+    @Test
+    fun cancelBeforeTransmitIsHonored() {
+        val transport = FakeTransport()
+        val controller = UniversalTransmissionController(transport)
+        controller.cancel()
+
+        val outcome = controller.transmit(
+            listOf(brand("samsung", powerOff())),
+            additionalPatterns = false,
+            delayMillis = 0,
+        )
+
+        assertEquals(UniversalOutcome.Cancelled(0), outcome)
+        assertTrue(transport.sent.isEmpty())
+    }
+
+    @Test
+    fun cancelBeforeMuteTransmitIsHonored() {
+        val transport = FakeTransport()
+        val controller = UniversalTransmissionController(transport)
+        controller.cancel()
+
+        val outcome = controller.transmitMute(
+            listOf(brand("samsung", mute())),
+            delayMillis = 0,
+        )
+
+        assertEquals(UniversalOutcome.Cancelled(0), outcome)
+        assertTrue(transport.sent.isEmpty())
+    }
+
+    @Test
+    fun resetClearsPreviousCancel() {
+        val transport = FakeTransport()
+        val controller = UniversalTransmissionController(transport)
+        controller.cancel()
+        controller.reset()
+
+        val outcome = controller.transmit(
+            listOf(brand("samsung", powerOff())),
+            additionalPatterns = false,
+            delayMillis = 0,
+        )
+
+        assertEquals(UniversalOutcome.Completed(1), outcome)
+        assertEquals(1, transport.sent.size)
+    }
 }

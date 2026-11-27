@@ -63,10 +63,21 @@ class RepetitiveTransmissionController(
 
     /** Thread-safe cancellation hook, driven by the screen's STOP button. */
     private val cancelFlag = AtomicBoolean(false)
+    private val running = AtomicBoolean(false)
 
     /** Requests cancellation of the currently running loop (if any). */
     fun cancel() {
         cancelFlag.set(true)
+    }
+
+    /**
+     * Clears a previous cancellation so the next [transmit] call can run. Must be
+     * called before starting a new run (and before the UI reports it as running)
+     * so a STOP press that lands in the launch window cannot be overwritten. A
+     * still-running loop keeps its cancel flag so a stale loop cannot be revived.
+     */
+    fun reset() {
+        if (!running.get()) cancelFlag.set(false)
     }
 
     /**
@@ -79,35 +90,39 @@ class RepetitiveTransmissionController(
         delayMillis: Long,
         onRound: (rounds: Int) -> Unit = {},
     ): RepetitiveOutcome {
-        val steps = UniversalSequence.build(brands, additionalPatterns)
-        if (steps.isEmpty()) return RepetitiveOutcome.NoPatterns
-        if (!transport.isAvailable()) return RepetitiveOutcome.TransportUnavailable
+        if (!running.compareAndSet(false, true)) return RepetitiveOutcome.Stopped(0)
+        try {
+            val steps = UniversalSequence.build(brands, additionalPatterns)
+            if (steps.isEmpty()) return RepetitiveOutcome.NoPatterns
+            if (!transport.isAvailable()) return RepetitiveOutcome.TransportUnavailable
 
-        var rounds = 0
-        cancelFlag.set(false)
-        while (true) {
-            for (step in steps) {
-                if (cancelFlag.get() || isCancelled()) return RepetitiveOutcome.Stopped(rounds)
-                transport.send(step.pattern).fold(
-                    onSuccess = {},
-                    onFailure = {
-                        return RepetitiveOutcome.Error(
-                            it.message ?: it.javaClass.simpleName,
-                            rounds,
-                        )
-                    },
-                )
-                if (delayMillis > 0) {
-                    try {
-                        Thread.sleep(delayMillis)
-                    } catch (_: InterruptedException) {
-                        Thread.currentThread().interrupt()
-                        return RepetitiveOutcome.Stopped(rounds)
+            var rounds = 0
+            while (true) {
+                for (step in steps) {
+                    if (cancelFlag.get() || isCancelled()) return RepetitiveOutcome.Stopped(rounds)
+                    transport.send(step.pattern).fold(
+                        onSuccess = {},
+                        onFailure = {
+                            return RepetitiveOutcome.Error(
+                                it.message ?: it.javaClass.simpleName,
+                                rounds,
+                            )
+                        },
+                    )
+                    if (delayMillis > 0) {
+                        try {
+                            Thread.sleep(delayMillis)
+                        } catch (_: InterruptedException) {
+                            Thread.currentThread().interrupt()
+                            return RepetitiveOutcome.Stopped(rounds)
+                        }
                     }
                 }
+                rounds++
+                onRound(rounds)
             }
-            rounds++
-            onRound(rounds)
+        } finally {
+            running.set(false)
         }
     }
 }

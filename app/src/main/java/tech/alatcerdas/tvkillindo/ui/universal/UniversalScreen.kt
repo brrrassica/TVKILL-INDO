@@ -35,6 +35,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -86,6 +87,7 @@ fun UniversalScreen(
     var running by remember { mutableStateOf(false) }
     var cancelling by remember { mutableStateOf(false) }
     var additionalPatterns by rememberSaveable { mutableStateOf(additionalPatternsDefault) }
+    LaunchedEffect(additionalPatternsDefault) { additionalPatterns = additionalPatternsDefault }
     var sentCount by remember { mutableStateOf(0) }
     var totalCount by remember { mutableStateOf(0) }
     var pendingOutcome by remember { mutableStateOf<UniversalOutcome?>(null) }
@@ -93,6 +95,10 @@ fun UniversalScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val progressChannel = remember { Channel<SendProgress>(Channel.CONFLATED) }
+
+    DisposableEffect(controller) {
+        onDispose { controller?.cancel() }
+    }
 
     LaunchedEffect(progressChannel) {
         for (progress in progressChannel) {
@@ -156,6 +162,7 @@ fun UniversalScreen(
             } else {
                 Button(
                     onClick = {
+                        controller?.reset()
                         running = true
                         cancelling = false
                         sentCount = 0
@@ -192,6 +199,7 @@ fun UniversalScreen(
 
                 if (showMute) Button(
                     onClick = {
+                        controller?.reset()
                         running = true
                         cancelling = false
                         sentCount = 0
