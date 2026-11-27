@@ -52,20 +52,25 @@ class Settings private constructor(context: Context) {
     private val lock = Object()
     val preferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
+    // Held as a field: SharedPreferences keeps change listeners in a weak set, so an
+    // anonymous listener would be GC'd and the LiveData values would stop updating.
+    private val prefListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        when {
+            PREF_MUTE == key -> showMuteInternal.setValue(preferences.getBoolean(PREF_MUTE, false))
+            PREF_ADDITIONAL_PATTERNS == key ->
+                additionalPatternsInternal.setValue(preferences.getBoolean(PREF_ADDITIONAL_PATTERNS, false))
+            else -> {
+                // ignore
+            }
+        }
+    }
+
     init {
 
         showMuteInternal.value = preferences.getBoolean(PREF_MUTE, false)
         additionalPatternsInternal.value = preferences.getBoolean(PREF_ADDITIONAL_PATTERNS, false)
 
-        preferences.registerOnSharedPreferenceChangeListener { _, key ->
-            when {
-                PREF_MUTE == key -> showMuteInternal.setValue(preferences.getBoolean(PREF_MUTE, false))
-                PREF_ADDITIONAL_PATTERNS == key -> additionalPatternsInternal.setValue(preferences.getBoolean(PREF_ADDITIONAL_PATTERNS, false))
-                else -> {
-                    // ignore
-                }
-            }
-        }
+        preferences.registerOnSharedPreferenceChangeListener(prefListener)
 
         appWidgetIds = Collections.unmodifiableSet(
                 HashSet<Int>(
